@@ -67,7 +67,13 @@ async function onGenerate() {
     els.textarea.value = ''; // 清空输入，方便下次规划
   } catch (e) {
     console.warn('[计划分解器] 分解失败：', e);
-    // 即便 decomposeTask 抛异常，也强制本地模板，确保永远有输出
+    if (e && e.isUpstream) {
+      // AI 服务商侧错误（Key/模型/余额/超时）：如实显示真实原因，不伪装成示例
+      lastUsedMock = null;
+      showDecomposeError(e.reason || 'AI 调用失败，请检查配置。');
+      return;
+    }
+    // 其他异常（网络等）：回退本地模板，确保界面不空白
     const mock = mockDecompose(desc, currentVariant);
     const task = store.replaceCurrentTask({
       title: desc,
@@ -94,7 +100,17 @@ async function onRegenerate() {
   if (!ok) return;
 
   currentVariant += 1;
-  let { steps, usedMock } = await decomposeTask(task.title || task.description, currentVariant);
+  let steps, usedMock;
+  try {
+    ({ steps, usedMock } = await decomposeTask(task.title || task.description, currentVariant));
+  } catch (e) {
+    if (e && e.isUpstream) {
+      lastUsedMock = null;
+      showDecomposeError(e.reason || 'AI 调用失败，请检查配置。');
+      return;
+    }
+    throw e;
+  }
   lastUsedMock = usedMock;
 
   if (!Array.isArray(steps) || steps.length === 0) {

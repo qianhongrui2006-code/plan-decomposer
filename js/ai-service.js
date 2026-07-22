@@ -241,14 +241,34 @@ export async function decomposeTask(description, variant = 0) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ description, variant }),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      // 尝试解析后端返回的结构化错误（含上游服务商真实报错）
+      let info = null;
+      try {
+        info = await res.json();
+      } catch {
+        /* 非 JSON 响应，忽略 */
+      }
+      // 502 + 上游错误：这是「AI 服务商侧」的问题（Key 无效 / 模型名错 / 余额不足 / 超时）
+      // 不再静默回退 Mock，而是把真实原因抛出去，让界面显示给用户看
+      if (info && (info.error === 'UPSTREAM_ERROR' || info.error === 'DECOMPOSE_FAILED' || info.error === 'EMPTY_STEPS')) {
+        const reason =
+          info.detail || info.message || `AI 接口返回 ${res.status}`;
+        const err = new Error(`AI 调用失败：${reason}`);
+        err.isUpstream = true;
+        err.reason = reason;
+        throw err;
+      }
+      throw new Error(`HTTP ${res.status}`);
+    }
     const data = await res.json();
     if (!data || !Array.isArray(data.steps) || !data.steps.length) {
       throw new Error('empty steps');
     }
     return { steps: data.steps, usedMock: false };
-  } catch {
-    // 未配置 AI_API_KEY 或网络/解析失败 → 回退本地模板，保证始终可用
+  } catch (e) {
+    if (e && e.isUpstream) throw e; // 上游错误：透传给调用方显示，不回退 Mock
+    // 未配置 AI_API_KEY、网络错误、解析失败等其他情况 → 回退本地模板，保证始终可用
     return { ...mockDecompose(description, variant), usedMock: true };
   }
 }
