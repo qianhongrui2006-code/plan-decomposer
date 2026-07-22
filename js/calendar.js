@@ -68,12 +68,10 @@ function renderBlocks() {
   ) || 8;
   // 极短任务的微小兜底高度，避免高度为 0/负值（不改变时间对应）
   const MIN_SLOT = 4;
-  // 布局按「内层卡片高度 = 外层时间槽高度 − 间隔」判定，避免扣掉 gap 后误判：
+  // 布局按「内层卡片高度 = 外层时间槽高度 − 间隔」判定：
   // - cardH < 18px：极短块，只显示时间（标题进 aria-label）
-  // - 18 ≤ cardH < 44px：短块，标题与时间同一行（横向）
-  // - ≥ 44px：常规两行（标题 + 时间）
+  // - ≥ 18px：统一单行显示「标题 + 时间」，标题省略、时间固定右侧，避免标题/时间黏连或换行
   const MICRO_PX = 18;
-  const SHORT_PX = 44;
   const date = store.getState().currentDate;
   const items = store.getScheduleByDate(date);
   // 时间精确渲染：外层 .time-block 占满真实时间槽（top/height 与时刻一一对应）；
@@ -86,12 +84,10 @@ function renderBlocks() {
     const height = Math.max(dur * pxPerMin, MIN_SLOT);
     const cardH = Math.max(height - gap, 2);
     const isMicro = cardH < MICRO_PX;
-    const isShort = cardH < SHORT_PX && !isMicro;
     const done = !!store.getStep(it.stepId)?.completed;
     const cls = 'time-block' +
       (done ? ' is-done' : '') +
       (isMicro ? ' is-micro' : '') +
-      (isShort ? ' is-short' : '') +
       (it.stepId === selectedStepId ? ' is-selected' : '');
     const draggable = done ? 'false' : 'true';
     const check = done
