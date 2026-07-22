@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>计划分解器</title>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <!-- 顶部标题栏 -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="topbar__logo" aria-hidden="true">◷</span>
+      <h1 class="topbar__title">计划分解器</h1>
+    </div>
+    <div class="topbar__plan" id="topbarPlan" title=""></div>
+    <div class="topbar__actions">
+      <button class="btn btn--ghost" type="button" id="exportBtn">导出日程</button>
+    </div>
+  </header>
+
+  <!-- 主区域：三栏布局 -->
+  <main class="layout">
+    <!-- 左侧：AI 任务分解面板 -->
+    <aside class="panel panel--left" id="taskPanel" data-panel="task" aria-label="AI 任务分解面板">
+      <div class="panel__header">
+        <button class="panel__grip" type="button" data-drag-handle aria-label="拖动以调整面板顺序" title="拖动调整面板顺序">
+          <span class="panel__grip-dot"></span>
+          <span class="panel__grip-dot"></span>
+          <span class="panel__grip-dot"></span>
+        </button>
+        <div class="panel__head-row">
+          <h2 class="panel__title">任务分解</h2>
+        </div>
+      </div>
+      <div class="panel__body" id="taskPanelBody">
+        <!-- 输入区域 -->
+        <div class="task-input">
+          <textarea
+            id="taskDescription"
+            class="form-textarea"
+            rows="4"
+            placeholder="描述你的计划，例如：我想在两周内学会 Vue3 基础"></textarea>
+          <div class="task-input__actions">
+            <button class="btn btn--primary btn--sm" type="button" id="generateBtn">
+              AI 分解
+            </button>
+          </div>
+        </div>
+        <!-- 步骤列表 -->
+        <div class="step-list" id="stepList" aria-live="polite">
+          <div class="empty-state" id="stepEmpty">
+            <p>输入计划并点击「AI 分解」生成细化步骤</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 中间：时间日历面板 -->
+    <section class="panel panel--center" id="calendarPanel" data-panel="calendar" aria-label="时间日历面板">
+      <div class="panel__header calendar-header">
+        <button class="panel__grip" type="button" data-drag-handle aria-label="拖动以调整面板顺序" title="拖动调整面板顺序">
+          <span class="panel__grip-dot"></span>
+          <span class="panel__grip-dot"></span>
+          <span class="panel__grip-dot"></span>
+        </button>
+        <div class="panel__head-row calendar-header__row">
+          <div class="calendar-header__nav">
+            <button class="icon-btn" type="button" id="prevDay" aria-label="前一天">‹</button>
+            <button class="btn btn--ghost btn--sm" type="button" id="todayBtn">今天</button>
+            <button class="icon-btn" type="button" id="nextDay" aria-label="后一天">›</button>
+          </div>
+          <h2 class="panel__title" id="calendarDate">2026年7月19日</h2>
+        </div>
+      </div>
+      <div class="panel__body calendar-body" id="calendarBody">
+        <!-- 时间线由 JS 渲染 -->
+      </div>
+    </section>
+
+    <!-- 右侧：任务详情面板 -->
+    <aside class="panel panel--right" id="detailPanel" data-panel="detail" aria-label="任务详情面板">
+      <div class="panel__header">
+        <button class="panel__grip" type="button" data-drag-handle aria-label="拖动以调整面板顺序" title="拖动调整面板顺序">
+          <span class="panel__grip-dot"></span>
+          <span class="panel__grip-dot"></span>
+          <span class="panel__grip-dot"></span>
+        </button>
+        <div class="panel__head-row">
+          <h2 class="panel__title">任务详情</h2>
+        </div>
+      </div>
+      <div class="panel__body" id="detailPanelBody">
+        <div class="empty-state" id="detailEmpty">
+          <p>选择一个步骤或时间块查看详情</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
