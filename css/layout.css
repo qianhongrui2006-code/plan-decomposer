@@ -10,10 +10,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--space-6);
-  background-color: var(--glass-bg-strong);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid var(--glass-border);
+  background-color: var(--color-surface-2);
+  border-bottom: 2px solid var(--color-border-strong);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -28,19 +26,21 @@
 .topbar__logo {
   display: inline-grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-600));
+  background-color: var(--color-primary-400);
   color: #fff;
   font-size: var(--font-size-lg);
+  border: 2px solid var(--color-text);
   box-shadow: var(--shadow-sm);
 }
 
 .topbar__title {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.01em;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.02em;
+  color: var(--color-text);
 }
 
 .topbar__actions {
@@ -65,23 +65,22 @@
 .layout {
   display: flex;
   align-items: stretch;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  height: calc(100vh - var(--topbar-height) - var(--space-8));
+  gap: var(--space-2);
+  padding: var(--space-3);
+  height: calc(100vh - var(--topbar-height) - var(--space-6));
   overflow: hidden;
 }
 
-/* ---------- 面板通用：圆滑大边框 + 毛玻璃 ---------- */
+/* ---------- 面板通用：实色大色块 + 粗边框 + 卡通硬阴影 ---------- */
 .panel {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background-color: var(--glass-bg);
-  -webkit-backdrop-filter: blur(26px) saturate(180%);
-  backdrop-filter: blur(26px) saturate(180%);
-  border: 1px solid var(--glass-border);
+  background-color: var(--color-surface);
+  background-image: var(--linen-texture);
+  border: 2px solid var(--color-border-strong);
   border-radius: var(--radius-lg);
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 
@@ -99,12 +98,12 @@
 .panel__header {
   flex: 0 0 auto;
   padding: var(--space-4);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 2px dashed var(--color-border);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
-  background: linear-gradient(180deg, rgba(255,255,255,0.6), transparent);
+  background-color: var(--color-surface-2);
 }
 .panel__head-row {
   display: flex;
@@ -123,7 +122,8 @@
 
 .panel__title {
   font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
 }
 
 .panel__body {
@@ -133,7 +133,7 @@
   padding: var(--space-4);
 }
 .panel__body::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 .panel__body::-webkit-scrollbar-thumb {
   background-color: var(--color-border-strong);
@@ -143,12 +143,10 @@
   background: transparent;
 }
 
-/* 中间日历头部：导航/日期布局见 .panel__head-row */
-
 /* ---------- 面板间分隔区：宽度调节（<||> 抓取提示）---------- */
 .resizer {
-  flex: 0 0 20px;
-  width: 20px;
+  flex: 0 0 16px;
+  width: 16px;
   cursor: col-resize;
   position: relative;
   background-color: transparent;
@@ -158,10 +156,11 @@
 }
 .resizer:hover,
 .resizer.is-active {
-  background-color: rgba(225, 248, 232, 0.5);
+  background-color: var(--color-surface-2);
   border-radius: var(--radius-full);
+  border: 2px dashed var(--color-border);
 }
-/* <||> 抓取提示：两道竖条，悬停/拖拽时变品牌色 */
+/* <||> 抓取提示 */
 .resizer__grip {
   position: absolute;
   top: 50%;
@@ -176,15 +175,16 @@
 }
 .resizer__grip i {
   display: block;
-  width: 3px;
+  width: 4px;
   height: 26px;
-  border-radius: 3px;
+  border-radius: 4px;
   background-color: var(--color-text-subtle);
+  border: 1px solid var(--color-text);
   transition: background-color var(--transition-fast), height var(--transition-fast);
 }
 .resizer:hover .resizer__grip i,
 .resizer.is-active .resizer__grip i {
-  background-color: var(--color-primary-500);
+  background-color: var(--color-primary-400);
   height: 30px;
 }
 body.is-resizing {
@@ -192,7 +192,7 @@ body.is-resizing {
   user-select: none;
 }
 
-/* ---------- 面板拖拽手柄：顶部居中、横排三个灰色小圆点 ---------- */
+/* ---------- 面板拖拽手柄：顶部居中、横排三个彩色小圆点 ---------- */
 .panel__grip {
   display: inline-flex;
   flex-direction: row;
@@ -208,39 +208,41 @@ body.is-resizing {
   touch-action: none;
 }
 .panel__grip:hover {
-  background-color: var(--color-surface-2);
+  background-color: var(--color-surface-3);
 }
 .panel__grip:focus-visible {
-  outline: 2px solid var(--color-primary-500);
-  outline-offset: 2px;
+  outline: 3px solid var(--color-primary-400);
+  outline-offset: 3px;
 }
 .panel__grip:active {
   cursor: grabbing;
 }
 .panel__grip-dot {
   display: block;
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background-color: var(--color-text-subtle);
+  border: 1px solid var(--color-text);
 }
+.panel__grip-dot:nth-child(1) { background-color: var(--color-primary-400); }
+.panel__grip-dot:nth-child(2) { background-color: var(--color-primary-200); }
+.panel__grip-dot:nth-child(3) { background-color: var(--color-primary-300); }
 
 /* ---------- 面板拖拽换位状态 ---------- */
-/* 拖拽中：面板半透明浮起（几何判定落点，不再需要 pointer-events:none） */
 .panel.is-dragging {
-  opacity: 0.9;
+  opacity: 0.95;
   box-shadow: var(--shadow-lg);
   z-index: 5;
   cursor: grabbing;
+  transform: rotate(1deg);
 }
-/* 落点高亮：显示「将交换到此」的预览 */
 .panel.is-drop-target {
-  outline: 2px dashed var(--color-primary-500);
-  outline-offset: -4px;
-  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
+  outline: 3px dashed var(--color-primary-400);
+  outline-offset: -6px;
+  background-color: var(--color-surface-3);
 }
 .panel.is-resizing-panel {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 body.is-reordering {
   user-select: none;
@@ -260,7 +262,7 @@ body.is-reordering {
   overflow-y: auto;
 }
 
-/* ---------- 响应式：窄屏自动堆叠（宽度调节禁用，顺序仍可调）---------- */
+/* ---------- 响应式：窄屏自动堆叠 ---------- */
 @media (max-width: 768px) {
   .topbar {
     flex-wrap: wrap;
@@ -281,13 +283,12 @@ body.is-reordering {
     flex-direction: column;
     height: auto;
     overflow: visible;
-    gap: var(--space-4);
+    gap: var(--space-2);
   }
   .panel[data-panel] {
     width: 100%;
     flex: 1 1 auto;
   }
-  /* 堆叠后日历需要可滚动高度，否则时间线被压扁 */
   .panel[data-panel="calendar"] {
     min-height: 70vh;
   }

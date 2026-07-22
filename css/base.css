@@ -21,11 +21,12 @@ body {
   line-height: var(--line-height-normal);
   color: var(--color-text);
   background-color: var(--color-bg);
+  /* 大块装饰色块：卡通、干净、有活力（蓝紫 + 淡粉，避开黄绿） */
   background-image:
-    radial-gradient(900px circle at 10% 14%, rgba(225, 248, 232, 0.72), transparent 55%),
-    radial-gradient(820px circle at 90% 12%, rgba(210, 234, 246, 0.68), transparent 55%),
-    radial-gradient(900px circle at 85% 88%, rgba(119, 140, 207, 0.18), transparent 55%),
-    radial-gradient(720px circle at 15% 90%, rgba(195, 215, 242, 0.42), transparent 55%);
+    radial-gradient(680px 520px ellipse at 8% 12%, var(--blob-blue) 0%, transparent 60%),
+    radial-gradient(600px 600px circle at 92% 8%, var(--blob-blue2) 0%, transparent 55%),
+    radial-gradient(520px 420px ellipse at 88% 92%, var(--blob-violet) 0%, transparent 55%),
+    radial-gradient(620px 500px ellipse at 10% 90%, var(--blob-pink) 0%, transparent 60%);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -61,13 +62,14 @@ a {
   text-decoration: none;
 }
 
-/* 焦点可见性（可访问性） */
+/* 焦点可见性（卡通风格：粗实线描边） */
 :focus-visible {
-  outline: 2px solid var(--color-primary-500);
-  outline-offset: 2px;
+  outline: 3px solid var(--color-primary-400);
+  outline-offset: 3px;
+  border-radius: var(--radius-md);
 }
 
-/* 尊重「减少动态效果」系统偏好（ vestibular 安全，可访问性） */
+/* 尊重「减少动态效果」系统偏好 */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -82,7 +84,7 @@ a {
 /* 选区颜色 */
 ::selection {
   background-color: var(--color-primary-200);
-  color: var(--color-primary-700);
+  color: var(--color-text);
 }
 
 /* 滚动条（webkit） */

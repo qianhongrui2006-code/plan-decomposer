@@ -1,59 +1,67 @@
 /* ============================================================
-   设计令牌 (Design Tokens) — 蓝紫薄荷雾主题
+   设计令牌 (Design Tokens) — 雾蓝事务所 + 粉色点缀
    计划分解器 · UI Designer
-   配色来源：#e1f8e8 / #d2eaf6 / #c3d7f2 / #778ccf
+   风格：整块色块 / 卡通圆润 / 亚麻质感标签 / 无框硬阴影
+   配色：近白 #f4f8fd / 浅天蓝 #d2eaf6 / 浅蓝 #c3d7f2 /
+         蓝紫 #778ccf / 粉 #e08aa8 / 深蓝紫文字 #2f3a59
+   说明：完全避开大范围的黄、绿；薄荷绿仅作极小面积装饰
    ============================================================ */
 
 :root {
-  /* ---------- 颜色：主色（蓝紫薄荷渐变系）---------- */
-  --color-primary-50:  #f0f9f6;
-  --color-primary-100: #e1f8e8;
-  --color-primary-200: #d2eaf6;
-  --color-primary-300: #c3d7f2;
-  --color-primary-400: #a8c2ec;
-  --color-primary-500: #778ccf;
-  --color-primary-600: #5f74b8;
-  --color-primary-700: #4a5d9e;
+  /* ---------- 页面 / 表面（雾蓝家族）---------- */
+  --color-bg:        #f4f8fd;   /* 页面背景：极淡蓝白 */
+  --color-surface:   #d2eaf6;   /* 面板底色：浅天蓝 */
+  --color-surface-2: #eaf2fc;   /* 卡片 / 次级底色：近白蓝 */
+  --color-surface-3: #c3d7f2;   /* 浅蓝：强调块 / hover */
 
-  /* ---------- 颜色：强调色（暖橙，用于当前时间线）---------- */
-  --color-accent-400: #fb923c;
-  --color-accent-500: #f59e0b;
+  /* ---------- 主色：蓝紫 ---------- */
+  --color-primary-100: #c3d7f2;
+  --color-primary-200: #a9c0ec;
+  --color-primary-300: #93aee6;
+  --color-primary-400: #778ccf;   /* 按钮 / logo */
+  --color-primary-500: #5d72c0;   /* hover / active */
+  --color-primary-600: #4a5da8;
+
+  /* 次强调（旧 accent，保留兼容） */
+  --color-accent-400: #a9c0ec;
+  --color-accent-500: #778ccf;
+
+  /* ---------- 粉色点缀（约占 10%）---------- */
+  --color-pink:        #e08aa8;   /* 选中态 / 强调块 */
+  --color-pink-soft:   #fbeaf0;   /* AI 实时条底 / 淡标签 */
+  --color-pink-strong: #d4537e;   /* 玫红文字 / 描边 */
 
   /* ---------- 语义色 ---------- */
-  --color-success: #34d399;
-  --color-success-bg: #e1f8e8;
-  --color-warning: #f59e0b;
-  --color-error:   #ef4444;
-  --color-error-bg: #fee2e2;
-  --color-info:    #60a5fa;
+  --color-success: #5bbf9b;
+  --color-success-bg: #d8f0e6;
+  --color-warning: #e6a663;
+  --color-error:   #e57373;
+  --color-error-bg: #fbe0e0;
+  --color-info:    #a9c0ec;
 
   /* ---------- 中性色 ---------- */
-  --color-bg:        #f5f8fb;
-  --color-surface:   rgba(255, 255, 255, 0.78);
-  --color-surface-2: rgba(255, 255, 255, 0.92);
-  --color-surface-3: rgba(226, 235, 247, 0.72);
-  --color-border:    rgba(195, 215, 242, 0.8);
-  --color-border-strong: rgba(119, 140, 207, 0.35);
+  --color-border:         #c3d4ea;   /* 浅边框 */
+  --color-border-strong:  #6b7fc4;   /* 卡通粗描边 + 硬阴影色（蓝紫） */
 
-  --color-text:        #2a3345;
-  --color-text-muted:  #4e5d75;
-  --color-text-subtle: #8b9ab0;
+  --color-text:        #2f3a59;   /* 深蓝紫文字 */
+  --color-text-muted:  #5b6b8c;
+  --color-text-subtle: #93a1bd;
 
-  /* ---------- 毛玻璃（柔雾 Frosted Glass）---------- */
-  --glass-bg: rgba(255, 255, 255, 0.62);
-  --glass-bg-strong: rgba(255, 255, 255, 0.86);
-  --glass-border: rgba(255, 255, 255, 0.72);
-  --glass-shadow: 0 10px 32px -8px rgb(42 51 69 / 0.12);
+  /* ---------- 大装饰色块（body 背景几何，避开黄绿）---------- */
+  --blob-blue:   #d2eaf6;
+  --blob-blue2:  #c3d7f2;
+  --blob-violet: #d9c9f0;
+  --blob-pink:   #fbeaf0;
 
   /* 时间块之间的视觉间隔 */
-  --block-gap: 8px;
+  --block-gap: 10px;
 
   /* 日历每小时高度 */
   --timeline-hour-height: 120px;
 
   /* ---------- 字体 ---------- */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC',
-               'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'PingFang SC', 'Microsoft YaHei', 'Nunito', 'Segoe UI',
+               'Noto Sans SC', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo,
                Consolas, monospace;
 
@@ -89,21 +97,23 @@
   --space-12: 3rem;    /* 48px */
   --space-16: 4rem;    /* 64px */
 
-  /* ---------- 圆角（全部加大）---------- */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  /* ---------- 圆角（卡通：更大更圆）---------- */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
   --radius-full: 9999px;
 
-  /* ---------- 阴影 ---------- */
-  --shadow-sm: 0 1px 2px 0 rgb(42 51 69 / 0.05);
-  --shadow-md: 0 6px 14px -4px rgb(42 51 69 / 0.10);
-  --shadow-lg: 0 16px 32px -8px rgb(42 51 69 / 0.14);
+  /* ---------- 阴影（卡通硬阴影：右下角，蓝紫色）---------- */
+  --color-shadow: #6b7fc4;
+  --shadow-sm: 2px 2px 0 var(--color-shadow);
+  --shadow-md: 4px 4px 0 var(--color-shadow);
+  --shadow-lg: 6px 6px 0 var(--color-shadow);
 
   /* ---------- 过渡 ---------- */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 400ms ease;
+  --transition-fast: 120ms ease;
+  --transition-normal: 220ms ease;
+  --transition-slow: 350ms ease;
 
   /* ---------- 尺寸常量 ---------- */
   --topbar-height: 64px;
@@ -113,4 +123,10 @@
   /* 时间线：可视起止小时 */
   --timeline-start-hour: 0;
   --timeline-end-hour: 24;
+
+  /* ---------- 亚麻噪点纹理（SVG data URI，极淡）---------- */
+  --linen-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+
+  /* 吊牌孔洞颜色：白色小孔，形成"穿透"感 */
+  --tag-hole-color: #ffffff;
 }

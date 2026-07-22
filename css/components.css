@@ -3,54 +3,63 @@
    计划分解器 · UI Designer
    ============================================================ */
 
-/* ---------- 按钮 ---------- */
+/* ---------- 按钮：卡通硬阴影 ---------- */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
-  border: 1px solid transparent;
+  border: 2px solid var(--color-text);
   border-radius: var(--radius-md);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
-  transition: background-color var(--transition-fast),
-              border-color var(--transition-fast),
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast),
               box-shadow var(--transition-fast),
-              transform var(--transition-fast),
-              filter var(--transition-fast);
+              background-color var(--transition-fast);
   user-select: none;
   white-space: nowrap;
 }
 
 .btn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
+  box-shadow: none;
 }
 
 .btn--primary {
-  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
+  background-color: var(--color-primary-400);
   color: #fff;
-  border: none;
+  border-color: var(--color-text);
 }
 .btn--primary:hover {
-  background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-500));
+  background-color: var(--color-primary-500);
+  transform: translate(-1px, -1px);
   box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
 }
 .btn--primary:active {
-  transform: translateY(1px);
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--color-text);
 }
 
 .btn--ghost {
-  background-color: transparent;
+  background-color: var(--color-surface-2);
   color: var(--color-text-muted);
-  border-color: var(--color-border);
+  border-color: var(--color-border-strong);
 }
 .btn--ghost:hover {
-  background-color: var(--color-surface-2);
+  background-color: var(--color-surface-3);
   color: var(--color-text);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-sm);
+}
+.btn--ghost:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
 }
 
 .btn--sm {
@@ -66,22 +75,29 @@
 .icon-btn {
   display: inline-grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--color-border);
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--color-text);
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
   color: var(--color-text-muted);
   font-size: var(--font-size-lg);
   line-height: 1;
-  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-fast),
+              color var(--transition-fast),
+              transform var(--transition-fast),
+              box-shadow var(--transition-fast);
 }
 .icon-btn:hover {
-  transform: translateY(-1px);
-}
-.icon-btn:hover {
-  background-color: var(--color-surface-2);
+  background-color: var(--color-surface-3);
   color: var(--color-text);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+.icon-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--color-text);
 }
 
 /* ---------- 表单 ---------- */
@@ -89,18 +105,21 @@
 .form-input {
   width: 100%;
   padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-surface);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: #fff;
   color: var(--color-text);
   resize: vertical;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: border-color var(--transition-fast),
+              box-shadow var(--transition-fast),
+              transform var(--transition-fast);
 }
 .form-textarea:focus,
 .form-input:focus {
   outline: none;
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px var(--color-primary-100);
+  border-color: var(--color-primary-400);
+  box-shadow: 3px 3px 0 var(--color-primary-200);
+  transform: translate(-1px, -1px);
 }
 .form-textarea::placeholder,
 .form-input::placeholder {
@@ -122,7 +141,7 @@
 .step-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 .step-list:empty::before {
   content: '暂无步骤，输入计划后点击 AI 分解';
@@ -133,23 +152,43 @@
   font-size: var(--font-size-sm);
 }
 
+/* 吊牌标签：左侧圆孔 + 亚麻纹理 */
 .step-card {
+  --tag-bg: #ffffff;
+  --tag-border: var(--color-border-strong);
+  position: relative;
   display: flex;
   align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-surface);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-3) 28px;
+  border: 2px solid var(--tag-border);
+  border-radius: var(--radius-md);
+  background-color: var(--tag-bg);
+  background-image: var(--linen-texture);
   box-shadow: var(--shadow-sm);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+  transition: transform var(--transition-fast),
+              box-shadow var(--transition-fast),
+              border-color var(--transition-fast);
+}
+/* 吊牌孔洞 */
+.step-card::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--tag-hole-color);
+  border: 2px solid var(--tag-border);
+  box-shadow: inset 1px 1px 2px rgba(47, 58, 89, 0.22);
+  z-index: 2;
 }
 .step-card:hover {
-  transform: translateY(-1px);
-}
-.step-card:hover {
-  border-color: var(--color-primary-300);
+  transform: translate(-2px, -2px);
   box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-400);
 }
 
 .step-card__index {
@@ -159,11 +198,12 @@
   min-width: 28px;
   height: 28px;
   padding: 0 var(--space-1);
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200));
-  color: var(--color-primary-700);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-400);
+  border: 2px solid var(--color-text);
+  color: #fff;
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
 }
 
 .step-card__main {
@@ -172,8 +212,9 @@
 }
 .step-card__title {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-bold);
   margin-bottom: var(--space-1);
+  color: var(--color-text);
 }
 .step-card__meta {
   font-size: var(--font-size-xs);
@@ -185,7 +226,7 @@
 .step-card__sub {
   display: flex;
   align-items: center;
-  flex-wrap: nowrap; /* 状态徽标不换行，长时长文字在本行内换行即可 */
+  flex-wrap: nowrap;
   gap: var(--space-2);
   margin-top: var(--space-1);
 }
@@ -197,25 +238,26 @@
   display: inline-block;
   flex: 1 1 auto;
   min-width: 0;
-  padding: 1px var(--space-2);
+  padding: 2px var(--space-2);
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200));
-  color: var(--color-primary-700);
+  background-color: var(--color-primary-100);
+  border: 1px solid var(--color-text);
+  color: var(--color-text);
   font-size: var(--font-size-xs);
   font-family: var(--font-mono);
 }
 
-/* 步骤卡：排程时间（拖动到日历后显示：日期 + 起止时间） */
+/* 步骤卡：排程时间 */
 .step-card__time {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   margin-top: var(--space-2);
-  padding: 2px var(--space-2);
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
-  border: 1px solid var(--color-primary-200);
-  color: var(--color-primary-700);
+  background-color: var(--color-primary-200);
+  border: 1px solid var(--color-text);
+  color: var(--color-text);
   font-size: var(--font-size-xs);
   font-family: var(--font-mono);
   line-height: 1.4;
@@ -225,7 +267,7 @@
   line-height: 1;
 }
 .step-card__time-date {
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   white-space: nowrap;
 }
 .step-card__time-range {
@@ -234,7 +276,7 @@
   white-space: nowrap;
 }
 
-/* 步骤卡：操作按钮（上移/下移/删除） */
+/* 步骤卡：操作按钮 */
 .step-card__actions {
   flex: 0 0 auto;
   display: flex;
@@ -246,31 +288,41 @@
   place-items: center;
   width: 28px;
   height: 28px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border: 2px solid var(--color-text);
+  border-radius: var(--radius-sm);
   background-color: var(--color-surface);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   line-height: 1;
   cursor: pointer;
+  box-shadow: 1px 1px 0 var(--color-text);
   transition: background-color var(--transition-fast),
-    color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+              color var(--transition-fast),
+              transform var(--transition-fast),
+              box-shadow var(--transition-fast);
 }
 .step-card__btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-.step-card__btn:hover:not(:disabled) {
-  background-color: var(--color-surface-2);
+  background-color: var(--color-surface-3);
   color: var(--color-text);
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 var(--color-text);
+}
+.step-card__btn:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: none;
 }
 .step-card__btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  box-shadow: none;
+}
+.step-card__btn--danger {
+  background-color: var(--color-error-bg);
 }
 .step-card__btn--danger:hover:not(:disabled) {
-  background-color: var(--color-error-bg);
-  color: var(--color-error);
-  border-color: var(--color-error-bg);
+  background-color: var(--color-error);
+  color: #fff;
+  border-color: var(--color-text);
 }
 
 /* 步骤卡：行内编辑标题 */
@@ -282,19 +334,19 @@
   transition: background-color var(--transition-fast);
 }
 .step-card__title:hover {
-  background-color: var(--color-surface-2);
+  background-color: var(--color-surface-3);
 }
 .step-card__title-input {
   width: 100%;
   padding: 2px 4px;
-  border: 1px solid var(--color-primary-500);
+  border: 2px solid var(--color-primary-400);
   border-radius: var(--radius-sm);
-  background-color: var(--color-surface);
+  background-color: #fff;
   color: var(--color-text);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-bold);
   outline: none;
-  box-shadow: 0 0 0 3px var(--color-primary-100);
+  box-shadow: 3px 3px 0 var(--color-primary-200);
 }
 
 /* 步骤列表底部：重新生成全部 */
@@ -303,28 +355,28 @@
   color: var(--color-text-muted);
 }
 .step-regen:hover {
-  color: var(--color-primary-700);
-  border-color: var(--color-primary-300);
+  color: var(--color-primary-600);
+  border-color: var(--color-primary-400);
 }
 
-/* 文本域校验失败（空输入） */
+/* 文本域校验失败 */
 .form-textarea.is-invalid {
   border-color: var(--color-error);
-  box-shadow: 0 0 0 3px var(--color-error-bg);
+  box-shadow: 3px 3px 0 var(--color-error-bg);
 }
 
-/* ---------- 时间线（JS 填充：00:00–24:00 刻度 + 时间块 + 当前时间线）---------- */
+/* ---------- 时间线 ---------- */
 .timeline {
   position: relative;
   width: 100%;
 }
 .timeline__grid {
-  padding-left: 64px; /* 左侧时刻度留位 */
+  padding-left: 64px;
 }
 .timeline__hour {
   position: relative;
   height: var(--timeline-hour-height);
-  border-top: 1px solid var(--color-border);
+  border-top: 2px solid var(--color-border);
 }
 .timeline__hour-label {
   position: absolute;
@@ -335,6 +387,7 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-subtle);
   font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
 }
 .timeline__half {
   position: absolute;
@@ -345,23 +398,21 @@
 }
 .timeline__end {
   position: relative;
-  border-top: 1px solid var(--color-border);
+  border-top: 2px solid var(--color-border);
   height: 0;
 }
 
-/* 时间块（高度按 AI 推荐时长换算，Step 5 拖拽生成）
-   整条统一墨绿色，无左侧深色条边
-   外层 .time-block 严格对应真实时间槽；内层 .time-block__card 负责视觉卡片与间隔 */
+/* 时间块：吊牌标签 */
 .time-block {
   position: absolute;
   left: 68px;
   right: var(--space-3);
-  /* 高度由 JS 按真实时长精确设置，top/height 与日历时刻一一对应 */
   overflow: visible;
   cursor: pointer;
 }
-/* 视觉卡片：用上下 margin 形成与相邻块的物理间隔，不影响外层时间对应 */
 .time-block__card {
+  --tag-bg: var(--color-primary-100);
+  --tag-border: var(--color-text);
   position: relative;
   height: calc(100% - var(--block-gap));
   margin: calc(var(--block-gap) / 2) 0;
@@ -370,44 +421,64 @@
   align-items: center;
   gap: 8px;
   justify-content: flex-start;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200));
-  border: 1px solid var(--color-primary-300);
+  border-radius: var(--radius-md);
+  background-color: var(--tag-bg);
+  background-image: var(--linen-texture);
+  border: 2px solid var(--tag-border);
   padding: var(--space-1) var(--space-3);
-  padding-right: 26px; /* 给右上角勾选留位 */
+  padding-right: 26px;
+  padding-left: 28px;
   overflow: hidden;
-  transition: box-shadow var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast),
+              background-color var(--transition-fast),
+              transform var(--transition-fast);
+}
+/* 时间块吊牌孔洞 */
+.time-block__card::before {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--tag-hole-color);
+  border: 2px solid var(--tag-border);
+  box-shadow: inset 1px 1px 2px rgba(47, 58, 89, 0.22);
+  z-index: 2;
 }
 .time-block:hover .time-block__card {
-  transform: translateY(-1px);
-}
-.time-block:hover .time-block__card {
+  transform: translate(-2px, -2px);
   box-shadow: var(--shadow-md);
-  background: linear-gradient(135deg, var(--color-primary-200), var(--color-primary-300));
+  background-color: var(--color-primary-200);
 }
 .time-block.is-selected .time-block__card {
-  background: linear-gradient(135deg, var(--color-primary-200), var(--color-primary-300));
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 2px var(--color-primary-300);
+  background-color: var(--color-pink);
+  border-color: var(--color-pink-strong);
+  box-shadow: 0 0 0 3px var(--color-pink);
 }
-/* 极短块（cardH < 18px）：只显示时间，保证时间一定可见；
-   给卡片一个最小高度，使时间文字不被裁剪（卡片可略微超出时间槽，不影响起始时刻对应） */
 .time-block.is-micro .time-block__card {
   padding: 0 var(--space-3);
   padding-right: 22px;
+  padding-left: 22px;
   justify-content: center;
   min-height: 16px;
+}
+.time-block.is-micro .time-block__card::before {
+  display: none;
 }
 .time-block.is-micro .time-block__time {
   font-size: 10px;
   line-height: 1.1;
-  color: var(--color-primary-700);
+  color: var(--color-text);
 }
 .time-block__title {
   flex: 1 1 auto;
-  min-width: 0;       /* 允许标题在窄空间内省略，把位置让给时间 */
+  min-width: 0;
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
   white-space: nowrap;
   overflow: hidden;
@@ -415,40 +486,42 @@
   margin-bottom: 0;
 }
 .time-block__time {
-  flex: 0 0 auto;     /* 时间始终完整显示，不被省略 */
+  flex: 0 0 auto;
   font-size: var(--font-size-xs);
-  color: var(--color-primary-700);
-  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-bold);
   font-family: var(--font-mono);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* 当前时间红线（仅今天显示，每分钟自动移动；半透明虚线） */
+/* 当前时间红线（仅今天显示；卡通虚线 + 圆点） */
 .now-line {
   position: absolute;
   left: 64px;
   right: 0;
-  height: 2px; /* 保持与左侧圆点同一参考盒，虚线用背景渐变绘制，避免 border 位移 */
+  height: 3px;
   background-image: repeating-linear-gradient(
     90deg,
-    var(--color-error) 0, var(--color-error) 6px,
-    transparent 6px, transparent 12px
+    var(--color-error) 0, var(--color-error) 8px,
+    transparent 8px, transparent 16px
   );
-  opacity: 0.5;
+  opacity: 0.65;
   z-index: 5;
   pointer-events: none;
 }
 .now-line::before {
   content: "";
   position: absolute;
-  left: -5px;
-  top: -3px;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
+  left: -6px;
+  top: -3.5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
   background-color: var(--color-error);
+  border: 2px solid #fff;
+  box-shadow: 1px 1px 0 rgba(47, 58, 89, 0.3);
 }
 
 /* ---------- 空状态 ---------- */
@@ -464,9 +537,9 @@
   font-size: var(--font-size-sm);
 }
 
-/* 拖拽中放置区高亮（Step 5 增强） */
+/* 拖拽中放置区高亮 */
 .timeline.is-drop-target {
-  background-color: var(--color-primary-50);
+  background-color: var(--color-surface-3);
 }
 
 /* ---------- 步骤卡：拖拽 / 状态 ---------- */
@@ -479,50 +552,50 @@
 .step-card.is-drag-source {
   opacity: 0.5;
 }
-/* 已安排：蓝紫描边 + 浅底，与左侧「待规划」形成区分 */
+/* 已安排 */
 .step-card.is-scheduled {
-  border-color: var(--color-primary-300);
-  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
+  --tag-bg: var(--color-primary-100);
+  --tag-border: var(--color-primary-500);
 }
 .step-card.is-scheduled .step-card__index {
-  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
-  color: #fff;
+  background-color: var(--color-primary-500);
 }
-/* 已完成：灰底 + 划线 + 锁定观感 */
+/* 已完成 */
 .step-card.is-done {
   opacity: 0.7;
-  background-color: var(--color-surface-2);
+  background-color: var(--color-surface);
 }
 .step-card.is-done .step-card__title {
   text-decoration: line-through;
   color: var(--color-text-subtle);
 }
 
-/* 状态徽标（待规划 / 已安排 / 已完成） */
+/* 状态徽标 */
 .step-card__status {
   display: inline-flex;
   align-items: center;
-  flex: 0 0 auto; /* 不被压缩、不被挤换行 */
-  white-space: nowrap; /* 已安排 / 待规划 / 已完成 始终单行 */
-  padding: 1px var(--space-2);
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 2px var(--space-2);
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-bold);
+  border: 1px solid var(--color-text);
 }
 .status--pending {
-  background-color: var(--color-surface-2);
+  background-color: var(--color-surface-3);
   color: var(--color-text-subtle);
 }
 .status--scheduled {
-  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200));
-  color: var(--color-primary-700);
+  background-color: var(--color-primary-200);
+  color: var(--color-text);
 }
 .status--done {
   background-color: var(--color-border);
   color: var(--color-text-muted);
 }
 
-/* 完成勾选（步骤卡 / 时间块共用） */
+/* 完成勾选 */
 .step-card__check,
 .time-block__check {
   display: inline-grid;
@@ -544,13 +617,12 @@
 .time-block:active {
   cursor: grabbing;
 }
-/* 键盘聚焦可见（与全局 :focus-visible 一致，作用于内层卡片）*/
 .time-block:focus-visible {
   outline: none;
 }
 .time-block:focus-visible .time-block__card {
-  outline: 2px solid var(--color-primary-500);
-  outline-offset: 2px;
+  outline: 3px solid var(--color-primary-400);
+  outline-offset: 3px;
 }
 .time-block[draggable="false"] {
   cursor: default;
@@ -582,7 +654,7 @@
 }
 
 /* ============================================================
-   右侧任务详情面板（Step 6）
+   右侧任务详情面板
    ============================================================ */
 .detail {
   display: flex;
@@ -596,7 +668,8 @@
 }
 .detail__title {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
 }
 .detail__meta {
   display: flex;
@@ -619,12 +692,12 @@
 }
 .detail__section:not(:first-of-type) {
   padding-top: var(--space-6);
-  border-top: 1px solid var(--color-border);
+  border-top: 2px dashed var(--color-border);
 }
 .detail__label {
   margin: 0;
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-muted);
 }
 .detail__time {
@@ -637,8 +710,9 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-2) var(--space-3);
-  background: linear-gradient(135deg, var(--color-surface-2), var(--color-surface-3));
-  border-radius: var(--radius-lg);
+  background-color: var(--color-primary-100);
+  border: 1px solid var(--color-text);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
 }
 .detail__time-row span {
@@ -646,7 +720,7 @@
 }
 .detail__time-row strong {
   font-family: var(--font-mono);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text);
 }
 .detail__hint {
@@ -655,8 +729,6 @@
   color: var(--color-text-subtle);
 }
 .detail__desc {
-  /* 高度随内容自动撑开，不固定（autoResize 控制 height）；
-     min-height 仅决定空白态的一行高度，有内容时由 JS 撑高 */
   min-height: calc(1.6em + var(--space-6));
   resize: none;
   overflow: hidden;
@@ -691,11 +763,10 @@
   margin-top: var(--space-2);
 }
 .detail__delete:hover {
-  filter: brightness(0.93);
-  box-shadow: var(--shadow-md);
+  filter: brightness(1.05);
 }
 
-/* 子任务区（描述下方）：清单 + 勾选打勾效果 */
+/* 子任务区 */
 .detail__subtasks-head {
   display: flex;
   align-items: center;
@@ -703,9 +774,10 @@
 }
 .detail__subtasks-progress {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-primary-700);
-  background-color: var(--color-primary-50);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  background-color: var(--color-primary-100);
+  border: 1px solid var(--color-text);
   border-radius: var(--radius-full);
   padding: 1px var(--space-2);
   font-family: var(--font-mono);
@@ -716,19 +788,21 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 .subtask {
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  background: linear-gradient(135deg, var(--color-surface-2), var(--color-surface-3));
-  border-radius: var(--radius-lg);
-  transition: background-color var(--transition-fast);
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
 }
 .subtask:hover {
   background-color: var(--color-surface-3);
+  transform: translate(-1px, -1px);
 }
 .subtask__row {
   display: flex;
@@ -752,7 +826,6 @@
   color: var(--color-text);
   transition: color var(--transition-fast);
 }
-/* 打勾效果：完成态文字置灰 + 中划线 */
 .subtask.is-done .subtask__title {
   color: var(--color-text-subtle);
   text-decoration: line-through;
@@ -777,7 +850,7 @@
 }
 .subtask__del:hover {
   color: var(--color-error);
-  background-color: rgb(239 68 68 / 0.10);
+  background-color: var(--color-error-bg);
 }
 .detail__subtasks-add {
   display: flex;
@@ -788,16 +861,15 @@
   min-width: 0;
 }
 
-/* 拖拽落点预览框（时间线内）：与真实时间块同尺寸的倒影
-   顶部 2px 粗虚线 = 开始时刻；浅色填充 = 任务将占用的区间 */
+/* 拖拽落点预览框 */
 .timeline__preview {
   position: absolute;
   left: 64px;
   right: 0;
-  border: 1.5px dashed var(--color-primary-500);
-  border-top-width: 2px; /* 顶部线加重，明确代表「开始时间」 */
-  border-radius: var(--radius-lg);
-  background-color: rgb(119 140 207 / 0.14); /* 主色 14% 透明填充 */
+  border: 2px dashed var(--color-pink-strong);
+  border-top-width: 3px;
+  border-radius: var(--radius-md);
+  background-color: rgb(224 138 168 / 0.28);
   z-index: 4;
   pointer-events: none;
 }
@@ -807,21 +879,22 @@
 
 /* 左侧面板：接收「取消安排」拖拽的高亮 */
 .panel__body.is-drop-target {
-  outline: 2px dashed var(--color-primary-500);
-  outline-offset: -6px;
-  background-color: var(--color-primary-50);
+  outline: 3px dashed var(--color-primary-400);
+  outline-offset: -8px;
+  background-color: var(--color-surface-3);
 }
 
-/* ---------- AI 模式提示条（区分真实 AI / 示例模板）---------- */
+/* ---------- AI 模式提示条 ---------- */
 .ai-mode-banner {
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-xs);
   line-height: var(--line-height-normal);
-  border: 1px solid transparent;
+  border: 2px solid var(--color-text);
+  box-shadow: var(--shadow-sm);
 }
 .ai-mode-banner__dot {
   flex: 0 0 auto;
@@ -838,24 +911,40 @@
   padding: 0 3px;
   border-radius: 4px;
   background-color: var(--color-surface-2);
+  border: 1px solid var(--color-border);
 }
 .ai-mode-banner--live {
-  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
-  border-color: var(--color-primary-200);
+  background-color: var(--color-pink-soft);
+  border-color: var(--color-pink-strong);
 }
 .ai-mode-banner--live .ai-mode-banner__dot {
-  color: var(--color-success);
+  color: var(--color-pink-strong);
 }
 .ai-mode-banner--live .ai-mode-banner__text strong {
-  color: var(--color-primary-600);
+  color: var(--color-pink-strong);
 }
 .ai-mode-banner--mock {
-  background: linear-gradient(135deg, #fffbeb, #fef3c7);
-  border-color: #fde68a;
+  background-color: var(--color-surface-3);
+  border-color: var(--color-border-strong);
 }
 .ai-mode-banner--mock .ai-mode-banner__dot {
-  color: var(--color-warning);
+  color: var(--color-primary-500);
 }
 .ai-mode-banner--mock .ai-mode-banner__text strong {
-  color: #b45309;
+  color: var(--color-primary-600);
+}
+
+/* ---------- 错误提示条 ---------- */
+.ai-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  background-color: var(--color-error-bg);
+  border: 2px solid var(--color-error);
+  color: var(--color-error);
+  box-shadow: var(--shadow-sm);
 }
