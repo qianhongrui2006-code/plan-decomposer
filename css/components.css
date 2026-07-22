@@ -806,3 +806,51 @@
   outline-offset: -6px;
   background-color: var(--color-primary-50);
 }
+
+/* ---------- AI 模式提示条（区分真实 AI / 示例模板）---------- */
+.ai-mode-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  border: 1px solid transparent;
+}
+.ai-mode-banner__dot {
+  flex: 0 0 auto;
+  font-size: 8px;
+  line-height: 1;
+  margin-top: 5px;
+}
+.ai-mode-banner__text {
+  color: var(--color-text-muted);
+}
+.ai-mode-banner__text code {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  padding: 0 3px;
+  border-radius: 4px;
+  background-color: var(--color-surface-2);
+}
+.ai-mode-banner--live {
+  background-color: var(--color-primary-50);
+  border-color: var(--color-primary-200);
+}
+.ai-mode-banner--live .ai-mode-banner__dot {
+  color: var(--color-success);
+}
+.ai-mode-banner--live .ai-mode-banner__text strong {
+  color: var(--color-primary-600);
+}
+.ai-mode-banner--mock {
+  background-color: #fffbeb; /* amber-50 */
+  border-color: #fde68a;     /* amber-200 */
+}
+.ai-mode-banner--mock .ai-mode-banner__dot {
+  color: var(--color-warning);
+}
+.ai-mode-banner--mock .ai-mode-banner__text strong {
+  color: #b45309; /* amber-700 */
+}
