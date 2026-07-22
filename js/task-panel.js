@@ -1,7 +1,7 @@
 // task-panel.js — 左侧 AI 任务分解面板
 // Step 3：输入区、AI 分解（mock）、步骤卡渲染、行内编辑标题、上移/下移、删除、底部重新生成全部
 import { store } from './store.js';
-import { decomposeTask } from './ai-service.js';
+import { decomposeTask, mockDecompose } from './ai-service.js';
 import { formatDateShort } from './utils.js';
 
 let currentTaskId = null; // 当前正在编辑的计划（单计划模型）
@@ -47,12 +47,17 @@ async function onGenerate() {
 
   try {
     currentVariant = 0;
-    const { steps, usedMock } = await decomposeTask(desc, currentVariant);
+    let { steps, usedMock } = await decomposeTask(desc, currentVariant);
     lastUsedMock = usedMock;
+
+    // 极端兜底：真实 AI 返回空/异常时，强制用本地模板保证界面不空白
     if (!Array.isArray(steps) || steps.length === 0) {
-      showDecomposeError('AI 未返回任何步骤，请检查控制台或 AI_API_KEY 配置。');
-      return;
+      console.warn('[计划分解器] AI 返回空步骤，强制 fallback 到本地模板');
+      const mock = mockDecompose(desc, currentVariant);
+      steps = mock.steps;
+      lastUsedMock = true;
     }
+
     const task = store.replaceCurrentTask({
       title: desc,
       description: desc,
@@ -62,7 +67,16 @@ async function onGenerate() {
     els.textarea.value = ''; // 清空输入，方便下次规划
   } catch (e) {
     console.warn('[计划分解器] 分解失败：', e);
-    showDecomposeError('分解出错，请查看浏览器控制台。');
+    // 即便 decomposeTask 抛异常，也强制本地模板，确保永远有输出
+    const mock = mockDecompose(desc, currentVariant);
+    const task = store.replaceCurrentTask({
+      title: desc,
+      description: desc,
+      steps: mock.steps,
+    });
+    currentTaskId = task.id;
+    lastUsedMock = true;
+    showDecomposeError('AI 服务异常，已自动切换为示例分解。');
   } finally {
     els.generateBtn.disabled = false;
     els.generateBtn.textContent = label;
@@ -80,12 +94,16 @@ async function onRegenerate() {
   if (!ok) return;
 
   currentVariant += 1;
-  const { steps, usedMock } = await decomposeTask(task.title || task.description, currentVariant);
+  let { steps, usedMock } = await decomposeTask(task.title || task.description, currentVariant);
   lastUsedMock = usedMock;
+
   if (!Array.isArray(steps) || steps.length === 0) {
-    showDecomposeError('AI 未返回任何步骤，请检查控制台或 AI_API_KEY 配置。');
-    return;
+    console.warn('[计划分解器] 重新生成时 AI 返回空步骤，fallback 到本地模板');
+    const mock = mockDecompose(task.title || task.description, currentVariant);
+    steps = mock.steps;
+    lastUsedMock = true;
   }
+
   const t = store.replaceCurrentTask({
     title: task.title,
     description: task.description,
