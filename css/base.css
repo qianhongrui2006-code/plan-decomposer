@@ -20,12 +20,12 @@ body {
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   color: var(--color-text);
-  background-color: #eef2f6;
+  background-color: var(--color-bg);
   background-image:
-    radial-gradient(900px circle at 12% 16%, rgba(4, 120, 87, 0.18), transparent 55%),
-    radial-gradient(820px circle at 88% 10%, rgba(16, 185, 129, 0.15), transparent 55%),
-    radial-gradient(900px circle at 82% 90%, rgba(245, 158, 11, 0.10), transparent 55%),
-    radial-gradient(720px circle at 18% 92%, rgba(59, 130, 246, 0.09), transparent 55%);
+    radial-gradient(900px circle at 10% 14%, rgba(225, 248, 232, 0.72), transparent 55%),
+    radial-gradient(820px circle at 90% 12%, rgba(210, 234, 246, 0.68), transparent 55%),
+    radial-gradient(900px circle at 85% 88%, rgba(119, 140, 207, 0.18), transparent 55%),
+    radial-gradient(720px circle at 15% 90%, rgba(195, 215, 242, 0.42), transparent 55%);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

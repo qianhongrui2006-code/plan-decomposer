@@ -17,7 +17,8 @@
   transition: background-color var(--transition-fast),
               border-color var(--transition-fast),
               box-shadow var(--transition-fast),
-              transform var(--transition-fast);
+              transform var(--transition-fast),
+              filter var(--transition-fast);
   user-select: none;
   white-space: nowrap;
 }
@@ -29,12 +30,14 @@
 }
 
 .btn--primary {
-  background-color: var(--color-primary-500);
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
   color: #fff;
+  border: none;
 }
 .btn--primary:hover {
-  background-color: var(--color-primary-600);
+  background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-500));
   box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 .btn--primary:active {
   transform: translateY(1px);
@@ -63,15 +66,18 @@
 .icon-btn {
   display: inline-grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
   color: var(--color-text-muted);
   font-size: var(--font-size-lg);
   line-height: 1;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+.icon-btn:hover {
+  transform: translateY(-1px);
 }
 .icon-btn:hover {
   background-color: var(--color-surface-2);
@@ -84,7 +90,7 @@
   width: 100%;
   padding: var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background-color: var(--color-surface);
   color: var(--color-text);
   resize: vertical;
@@ -118,6 +124,14 @@
   flex-direction: column;
   gap: var(--space-3);
 }
+.step-list:empty::before {
+  content: '暂无步骤，输入计划后点击 AI 分解';
+  display: block;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-sm);
+}
 
 .step-card {
   display: flex;
@@ -125,10 +139,13 @@
   gap: var(--space-3);
   padding: var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background-color: var(--color-surface);
   box-shadow: var(--shadow-sm);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+.step-card:hover {
+  transform: translateY(-1px);
 }
 .step-card:hover {
   border-color: var(--color-primary-300);
@@ -139,11 +156,11 @@
   flex: 0 0 auto;
   display: inline-grid;
   place-items: center;
-  min-width: 26px;
-  height: 26px;
+  min-width: 28px;
+  height: 28px;
   padding: 0 var(--space-1);
-  border-radius: var(--radius-sm);
-  background-color: var(--color-primary-100);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200));
   color: var(--color-primary-700);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
@@ -182,7 +199,7 @@
   min-width: 0;
   padding: 1px var(--space-2);
   border-radius: var(--radius-full);
-  background-color: var(--color-primary-100);
+  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200));
   color: var(--color-primary-700);
   font-size: var(--font-size-xs);
   font-family: var(--font-mono);
@@ -195,9 +212,9 @@
   gap: var(--space-2);
   margin-top: var(--space-2);
   padding: 2px var(--space-2);
-  border-radius: var(--radius-sm);
-  background-color: var(--color-primary-50);
-  border: 1px solid var(--color-primary-100);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
+  border: 1px solid var(--color-primary-200);
   color: var(--color-primary-700);
   font-size: var(--font-size-xs);
   font-family: var(--font-mono);
@@ -227,17 +244,20 @@
 .step-card__btn {
   display: inline-grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background-color: var(--color-surface);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   line-height: 1;
   cursor: pointer;
   transition: background-color var(--transition-fast),
-    color var(--transition-fast), border-color var(--transition-fast);
+    color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+.step-card__btn:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 .step-card__btn:hover:not(:disabled) {
   background-color: var(--color-surface-2);
@@ -346,24 +366,29 @@
   height: calc(100% - var(--block-gap));
   margin: calc(var(--block-gap) / 2) 0;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-radius: var(--radius-md);
-  background-color: var(--color-primary-100);
-  border: 1px solid var(--color-primary-200);
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200));
+  border: 1px solid var(--color-primary-300);
   padding: var(--space-1) var(--space-3);
   padding-right: 26px; /* 给右上角勾选留位 */
   overflow: hidden;
-  transition: box-shadow var(--transition-fast), background-color var(--transition-fast);
+  transition: box-shadow var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast);
+}
+.time-block:hover .time-block__card {
+  transform: translateY(-1px);
 }
 .time-block:hover .time-block__card {
   box-shadow: var(--shadow-md);
-  background-color: var(--color-primary-200);
+  background: linear-gradient(135deg, var(--color-primary-200), var(--color-primary-300));
 }
 .time-block.is-selected .time-block__card {
-  background-color: var(--color-primary-200);
-  border-color: var(--color-primary-300);
-  box-shadow: 0 0 0 2px var(--color-primary-500);
+  background: linear-gradient(135deg, var(--color-primary-200), var(--color-primary-300));
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 2px var(--color-primary-300);
 }
 /* 极短块（cardH < 18px）：只显示时间，保证时间一定可见；
    给卡片一个最小高度，使时间文字不被裁剪（卡片可略微超出时间槽，不影响起始时刻对应） */
@@ -378,39 +403,19 @@
   line-height: 1.1;
   color: var(--color-primary-700);
 }
-/* 短块（18–44px cardH）：标题与时间挤在同一行（横向）；
-   同样给最小高度，保证单行文字在任何密度下都不被裁剪 */
-.time-block.is-short:not(.is-micro) .time-block__card {
-  flex-direction: row;
-  align-items: center;
-  gap: 6px;
-  padding: 0 var(--space-3);
-  padding-right: 22px;
-  justify-content: flex-start;
-  min-height: 22px;
-}
-.time-block.is-short:not(.is-micro) .time-block__title {
+.time-block__title {
   flex: 1 1 auto;
   min-width: 0;       /* 允许标题在窄空间内省略，把位置让给时间 */
-  margin-bottom: 0;
-  font-size: 12px;
-  line-height: 1.2;
-}
-.time-block.is-short:not(.is-micro) .time-block__time {
-  flex: 0 0 auto;     /* 时间始终完整显示，不被省略 */
-  font-size: 11px;
-  line-height: 1.2;
-}
-.time-block__title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-tight);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 2px;
+  margin-bottom: 0;
 }
 .time-block__time {
+  flex: 0 0 auto;     /* 时间始终完整显示，不被省略 */
   font-size: var(--font-size-xs);
   color: var(--color-primary-700);
   font-weight: var(--font-weight-medium);
@@ -474,13 +479,13 @@
 .step-card.is-drag-source {
   opacity: 0.5;
 }
-/* 已安排：墨绿描边 + 浅底，与左侧「待规划」形成区分 */
+/* 已安排：蓝紫描边 + 浅底，与左侧「待规划」形成区分 */
 .step-card.is-scheduled {
   border-color: var(--color-primary-300);
-  background-color: var(--color-primary-50);
+  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
 }
 .step-card.is-scheduled .step-card__index {
-  background-color: var(--color-primary-500);
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
   color: #fff;
 }
 /* 已完成：灰底 + 划线 + 锁定观感 */
@@ -509,7 +514,7 @@
   color: var(--color-text-subtle);
 }
 .status--scheduled {
-  background-color: var(--color-primary-100);
+  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200));
   color: var(--color-primary-700);
 }
 .status--done {
@@ -632,8 +637,8 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-2) var(--space-3);
-  background-color: var(--color-surface-2);
-  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-surface-2), var(--color-surface-3));
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-sm);
 }
 .detail__time-row span {
@@ -718,8 +723,8 @@
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  background-color: var(--color-surface-2);
-  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-surface-2), var(--color-surface-3));
+  border-radius: var(--radius-lg);
   transition: background-color var(--transition-fast);
 }
 .subtask:hover {
@@ -791,8 +796,8 @@
   right: 0;
   border: 1.5px dashed var(--color-primary-500);
   border-top-width: 2px; /* 顶部线加重，明确代表「开始时间」 */
-  border-radius: var(--radius-md);
-  background-color: rgb(4 120 87 / 0.10); /* 墨绿 10% 透明填充 */
+  border-radius: var(--radius-lg);
+  background-color: rgb(119 140 207 / 0.14); /* 主色 14% 透明填充 */
   z-index: 4;
   pointer-events: none;
 }
@@ -813,7 +818,7 @@
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-xs);
   line-height: var(--line-height-normal);
   border: 1px solid transparent;
@@ -835,7 +840,7 @@
   background-color: var(--color-surface-2);
 }
 .ai-mode-banner--live {
-  background-color: var(--color-primary-50);
+  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
   border-color: var(--color-primary-200);
 }
 .ai-mode-banner--live .ai-mode-banner__dot {
@@ -845,12 +850,12 @@
   color: var(--color-primary-600);
 }
 .ai-mode-banner--mock {
-  background-color: #fffbeb; /* amber-50 */
-  border-color: #fde68a;     /* amber-200 */
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #fde68a;
 }
 .ai-mode-banner--mock .ai-mode-banner__dot {
   color: var(--color-warning);
 }
 .ai-mode-banner--mock .ai-mode-banner__text strong {
-  color: #b45309; /* amber-700 */
+  color: #b45309;
 }

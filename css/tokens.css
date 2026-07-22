@@ -1,52 +1,54 @@
 /* ============================================================
-   设计令牌 (Design Tokens) — 单一浅色主题
+   设计令牌 (Design Tokens) — 蓝紫薄荷雾主题
    计划分解器 · UI Designer
+   配色来源：#e1f8e8 / #d2eaf6 / #c3d7f2 / #778ccf
    ============================================================ */
 
 :root {
-  /* ---------- 颜色：主色（墨绿系）---------- */
-  --color-primary-50:  #ecfdf5;
-  --color-primary-100: #d1fae5;
-  --color-primary-200: #a7f3d0;
-  --color-primary-300: #6ee7b7;
-  --color-primary-400: #34d399;
-  --color-primary-500: #047857;  /* 主色 · 墨绿 */
-  --color-primary-600: #065f46;  /* 主色 hover/active */
-  --color-primary-700: #064e3b;
+  /* ---------- 颜色：主色（蓝紫薄荷渐变系）---------- */
+  --color-primary-50:  #f0f9f6;
+  --color-primary-100: #e1f8e8;
+  --color-primary-200: #d2eaf6;
+  --color-primary-300: #c3d7f2;
+  --color-primary-400: #a8c2ec;
+  --color-primary-500: #778ccf;
+  --color-primary-600: #5f74b8;
+  --color-primary-700: #4a5d9e;
 
-  /* ---------- 颜色：强调色（当前时间线）---------- */
+  /* ---------- 颜色：强调色（暖橙，用于当前时间线）---------- */
   --color-accent-400: #fb923c;
   --color-accent-500: #f59e0b;
 
   /* ---------- 语义色 ---------- */
-  --color-success: #10b981;
-  --color-success-bg: #d1fae5;
+  --color-success: #34d399;
+  --color-success-bg: #e1f8e8;
   --color-warning: #f59e0b;
   --color-error:   #ef4444;
   --color-error-bg: #fee2e2;
-  --color-info:    #3b82f6;
+  --color-info:    #60a5fa;
 
   /* ---------- 中性色 ---------- */
-  --color-bg:        #f8fafc;   /* 页面背景 slate-50 */
-  --color-surface:   #ffffff;   /* 卡片/面板 surface */
-  --color-surface-2: #f1f5f9;   /* 次级背景 slate-100 */
-  --color-surface-3: #e9eef5;   /* 三级背景（hover 态）*/
-  --color-border:    #e2e8f0;   /* 边框 slate-200 */
-  --color-border-strong: #cbd5e1; /* slate-300 */
+  --color-bg:        #f5f8fb;
+  --color-surface:   rgba(255, 255, 255, 0.78);
+  --color-surface-2: rgba(255, 255, 255, 0.92);
+  --color-surface-3: rgba(226, 235, 247, 0.72);
+  --color-border:    rgba(195, 215, 242, 0.8);
+  --color-border-strong: rgba(119, 140, 207, 0.35);
 
-  --color-text:        #1e293b; /* 主文本 slate-800 */
-  --color-text-muted:  #475569; /* 次级文本 slate-600（对比度≥7:1，达 WCAG AA）*/
-  --color-text-subtle: #94a3b8; /* 弱文本 slate-400 */
+  --color-text:        #2a3345;
+  --color-text-muted:  #4e5d75;
+  --color-text-subtle: #8b9ab0;
 
-  /* ---------- 毛玻璃（Apple 风格 frosted glass）---------- */
-  --glass-bg: rgba(255, 255, 255, 0.55);
-  --glass-bg-strong: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.65);
-  --glass-shadow: 0 8px 30px -6px rgb(15 23 42 / 0.14);
-  /* 时间块之间的视觉间隔（用在内层卡片，不影响任务真实时间对应） */
+  /* ---------- 毛玻璃（柔雾 Frosted Glass）---------- */
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-bg-strong: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.72);
+  --glass-shadow: 0 10px 32px -8px rgb(42 51 69 / 0.12);
+
+  /* 时间块之间的视觉间隔 */
   --block-gap: 8px;
 
-  /* 日历每小时高度：提高分辨率，让 15–30 分钟短任务也能显示时间 */
+  /* 日历每小时高度 */
   --timeline-hour-height: 120px;
 
   /* ---------- 字体 ---------- */
@@ -75,7 +77,7 @@
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.7;
 
-  /* ---------- 间距（4px 基准系统）---------- */
+  /* ---------- 间距 ---------- */
   --space-1: 0.25rem;  /* 4px */
   --space-2: 0.5rem;   /* 8px */
   --space-3: 0.75rem;  /* 12px */
@@ -87,16 +89,16 @@
   --space-12: 3rem;    /* 48px */
   --space-16: 4rem;    /* 64px */
 
-  /* ---------- 圆角 ---------- */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  /* ---------- 圆角（全部加大）---------- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
   --radius-full: 9999px;
 
   /* ---------- 阴影 ---------- */
-  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.06);
-  --shadow-md: 0 4px 10px -2px rgb(15 23 42 / 0.10);
-  --shadow-lg: 0 12px 24px -6px rgb(15 23 42 / 0.14);
+  --shadow-sm: 0 1px 2px 0 rgb(42 51 69 / 0.05);
+  --shadow-md: 0 6px 14px -4px rgb(42 51 69 / 0.10);
+  --shadow-lg: 0 16px 32px -8px rgb(42 51 69 / 0.14);
 
   /* ---------- 过渡 ---------- */
   --transition-fast: 150ms ease;
@@ -104,11 +106,11 @@
   --transition-slow: 400ms ease;
 
   /* ---------- 尺寸常量 ---------- */
-  --topbar-height: 56px;
+  --topbar-height: 64px;
   --panel-left-width: 340px;
   --panel-right-width: 340px;
 
   /* 时间线：可视起止小时 */
-  --timeline-start-hour: 0;   /* 00:00 */
-  --timeline-end-hour: 24;    /* 24:00 */
+  --timeline-start-hour: 0;
+  --timeline-end-hour: 24;
 }
