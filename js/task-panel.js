@@ -8,6 +8,8 @@ let currentTaskId = null; // 当前正在编辑的计划（单计划模型）
 let currentVariant = 0; // 当前方案变体，供「重新生成全部」循环切换
 let editingStepId = null; // 正在行内编辑的步骤，避免订阅重渲染打断输入
 let cancelEdit = false; // Escape 取消编辑标记
+let lastUsedMock = null; // 最近一次分解是否走本地示例模板（true=示例，false=真实 AI，null=尚未生成）
+let decomposeError = null; // 分解失败的临时提示文本
 
 const els = {};
 
@@ -29,7 +31,7 @@ export function initTaskPanel() {
 }
 
 /* ---------------- 生成 ---------------- */
-function onGenerate() {
+async function onGenerate() {
   const desc = els.textarea.value.trim();
   if (!desc) {
     els.textarea.classList.add('is-invalid');
@@ -38,29 +40,37 @@ function onGenerate() {
     return;
   }
 
-  // 模拟异步思考（真实大模型 API 在 Step 8 接入，接口不变）
+  // 真实异步：调用 /api/decompose（未配置 AI 时回退本地 Mock）
   els.generateBtn.disabled = true;
   const label = els.generateBtn.textContent;
   els.generateBtn.textContent = 'AI 分解中…';
 
-  setTimeout(() => {
+  try {
     currentVariant = 0;
-    const { steps } = decomposeTask(desc, currentVariant);
+    const { steps, usedMock } = await decomposeTask(desc, currentVariant);
+    lastUsedMock = usedMock;
+    if (!Array.isArray(steps) || steps.length === 0) {
+      showDecomposeError('AI 未返回任何步骤，请检查控制台或 AI_API_KEY 配置。');
+      return;
+    }
     const task = store.replaceCurrentTask({
       title: desc,
       description: desc,
       steps,
     });
     currentTaskId = task.id;
-
+    els.textarea.value = ''; // 清空输入，方便下次规划
+  } catch (e) {
+    console.warn('[计划分解器] 分解失败：', e);
+    showDecomposeError('分解出错，请查看浏览器控制台。');
+  } finally {
     els.generateBtn.disabled = false;
     els.generateBtn.textContent = label;
-    els.textarea.value = ''; // 清空输入，方便下次规划
-  }, 450);
+  }
 }
 
 /* ---------------- 重新生成全部 ---------------- */
-function onRegenerate() {
+async function onRegenerate() {
   const task = currentTaskId
     ? store.getTask(currentTaskId)
     : store.getState().tasks[0];
@@ -70,7 +80,12 @@ function onRegenerate() {
   if (!ok) return;
 
   currentVariant += 1;
-  const { steps } = decomposeTask(task.title || task.description, currentVariant);
+  const { steps, usedMock } = await decomposeTask(task.title || task.description, currentVariant);
+  lastUsedMock = usedMock;
+  if (!Array.isArray(steps) || steps.length === 0) {
+    showDecomposeError('AI 未返回任何步骤，请检查控制台或 AI_API_KEY 配置。');
+    return;
+  }
   const t = store.replaceCurrentTask({
     title: task.title,
     description: task.description,
@@ -178,7 +193,11 @@ function render() {
     : store.getState().tasks[0];
 
   if (!task || task.steps.length === 0) {
+    const errorBanner = decomposeError
+      ? `<div class="ai-mode-banner ai-mode-banner--mock" role="alert"><span class="ai-mode-banner__dot" aria-hidden="true">●</span><span class="ai-mode-banner__text">${escapeHtml(decomposeError)}</span></div>`
+      : '';
     els.stepList.innerHTML =
+      errorBanner +
       '<div class="empty-state"><p>输入计划并点击「AI 分解」生成细化步骤</p></div>';
     return;
   }
@@ -197,7 +216,32 @@ function render() {
       ↻ 重新生成全部
     </button>`;
 
-  els.stepList.innerHTML = cards + regen;
+  els.stepList.innerHTML = modeBannerHTML() + cards + regen;
+}
+
+/** 显示分解错误提示，4 秒后自动清除 */
+function showDecomposeError(message) {
+  decomposeError = message;
+  render();
+  setTimeout(() => {
+    decomposeError = null;
+    render();
+  }, 4000);
+}
+
+/** 顶部模式提示：区分「真实 AI 生成」与「本地示例模板」，避免把模板误当成 AI 输出 */
+function modeBannerHTML() {
+  if (lastUsedMock === null) return '';
+  if (lastUsedMock) {
+    return `<div class="ai-mode-banner ai-mode-banner--mock" role="status">
+      <span class="ai-mode-banner__dot" aria-hidden="true">●</span>
+      <span class="ai-mode-banner__text">当前为<strong>示例分解</strong>（未接入 AI 或调用失败）。在 Vercel 配置 <code>AI_API_KEY</code> 后将切换为真实 AI 生成。</span>
+    </div>`;
+  }
+  return `<div class="ai-mode-banner ai-mode-banner--live" role="status">
+    <span class="ai-mode-banner__dot" aria-hidden="true">●</span>
+    <span class="ai-mode-banner__text">由 <strong>DeepSeek 实时生成</strong></span>
+  </div>`;
 }
 
 function stepCardHTML(s, i, total, date) {

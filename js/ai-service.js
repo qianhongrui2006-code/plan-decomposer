@@ -1,8 +1,8 @@
-// ai-service.js — AI 任务分解服务（Mock 版）
-// Step 3：关键词模板驱动，逐条给出步骤与 AI 推荐时长（estimatedMinutes）。
-// 真实大模型 API 将在 Step 8 接入，届时只替换 decomposeTask 的实现，
-// 接口签名保持不变：decomposeTask(description, variant = 0) -> { steps: StepSeed[] }
-// StepSeed = { title, estimatedMinutes, standard }
+// ai-service.js — AI 任务分解服务
+// Step 8：decomposeTask 改为异步，优先调用 /api/decompose（Vercel 无服务器函数，真实大模型）；
+//         若未配置 AI_API_KEY 或调用失败，则优雅回退到本地模板 Mock，保证 UI 永远可用。
+// 接口：decomposeTask(description, variant = 0) -> Promise<{ steps: StepSeed[], usedMock: boolean }>
+// StepSeed = { title, estimatedMinutes, standard, subtasks:[{title,completed}] }
 
 /**
  * 模板库。
@@ -165,15 +165,23 @@ const TEMPLATES = [
   },
 ];
 
-/** 兜底通用模板（未命中任何关键词时使用） */
-const FALLBACK = [
-  { title: '明确目标', estimatedMinutes: 30, standard: '写下可衡量的目标' },
-  { title: '拆解关键任务', estimatedMinutes: 45, standard: '列出 3-5 个关键子任务' },
-  { title: '制定时间表', estimatedMinutes: 30, standard: '排定起止时间' },
-  { title: '执行第一步', estimatedMinutes: 60, standard: '完成最小启动动作' },
-  { title: '检查与调整', estimatedMinutes: 30, standard: '对照目标校正方向' },
-  { title: '总结复盘', estimatedMinutes: 30, standard: '沉淀经验' },
-];
+/**
+ * 兜底通用模板（未命中任何关键词时使用）。
+ * 注意：这里只是「未接入 AI 时的示例」，会带上用户输入的主题词，避免完全千篇一律；
+ * 真正想要针对具体计划的分解，请在 Vercel 配置 AI_API_KEY 启用真实模型。
+ * @param {string} description 用户描述的计划
+ */
+function buildFallback(description) {
+  // 取描述前 14 个字作为主题词，避免截断在词中间造成乱码（按字符截断，非字节）
+  const topic = (description || '').trim().slice(0, 14) || '这个计划';
+  return [
+    { title: `明确「${topic}」的目标与验收标准`, estimatedMinutes: 30, standard: '写下可衡量、可验收的目标' },
+    { title: `拆解「${topic}」的关键子任务`, estimatedMinutes: 45, standard: '列出 3-5 个关键子任务' },
+    { title: `为「${topic}」排出时间表`, estimatedMinutes: 30, standard: '排定起止时间与里程碑' },
+    { title: `推进「${topic}」的第一步`, estimatedMinutes: 60, standard: '完成一个最小启动动作' },
+    { title: `对照目标检查「${topic}」`, estimatedMinutes: 30, standard: '对照目标校正方向' },
+  ];
+}
 
 /**
  * 为单步生成 AI 子任务提示（Mock）。
@@ -191,12 +199,12 @@ function seedSubtasks(step) {
 }
 
 /**
- * 分解任务（Mock）。
+ * 本地模板 Mock 分解（同步，作为真实 AI 的兜底）。
  * @param {string} description 用户描述的计划
  * @param {number} variant 方案变体序号（用于「重新生成全部」循环切换）
  * @returns {{ steps: Array<{title:string, estimatedMinutes:number, standard:string, subtasks:Array}> }}
  */
-export function decomposeTask(description, variant = 0) {
+export function mockDecompose(description, variant = 0) {
   const text = (description || '').toLowerCase();
   const hit = TEMPLATES.find((tpl) =>
     tpl.keywords.some((k) => text.includes(k.toLowerCase()))
@@ -206,8 +214,8 @@ export function decomposeTask(description, variant = 0) {
   if (hit) {
     variants = hit.variants;
   } else {
-    // 兜底也包成 variants，保证 variant 取模安全
-    variants = [FALLBACK];
+    // 未命中关键词：用带主题词的兜底模板（包成 variants 保证 variant 取模安全）
+    variants = [buildFallback(description)];
   }
 
   const steps = variants[variant % variants.length];
@@ -218,4 +226,29 @@ export function decomposeTask(description, variant = 0) {
       subtasks: seedSubtasks(s),
     })),
   };
+}
+
+/**
+ * 分解任务（异步）：优先调用真实 AI（/api/decompose），失败/未配置则回退本地 Mock。
+ * @param {string} description 用户描述的计划
+ * @param {number} variant 方案变体序号
+ * @returns {Promise<{ steps: Array, usedMock: boolean }>}
+ */
+export async function decomposeTask(description, variant = 0) {
+  try {
+    const res = await fetch('/api/decompose', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description, variant }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data || !Array.isArray(data.steps) || !data.steps.length) {
+      throw new Error('empty steps');
+    }
+    return { steps: data.steps, usedMock: false };
+  } catch {
+    // 未配置 AI_API_KEY 或网络/解析失败 → 回退本地模板，保证始终可用
+    return { ...mockDecompose(description, variant), usedMock: true };
+  }
 }
