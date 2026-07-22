@@ -68,11 +68,12 @@ module.exports = async (req, res) => {
   const model = process.env.AI_MODEL || 'deepseek-chat';
 
   let description = '';
+  let variant = 0;
   try {
     const raw = await readBody(req);
     const parsed = raw ? JSON.parse(raw) : {};
     description = String(parsed.description || '');
-    const variant = Number.isFinite(Number(parsed.variant)) ? Number(parsed.variant) : 0;
+    variant = Number.isFinite(Number(parsed.variant)) ? Number(parsed.variant) : 0;
   } catch {
     return res.status(400).json({ error: 'BAD_REQUEST' });
   }
