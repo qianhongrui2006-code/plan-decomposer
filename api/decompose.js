@@ -85,6 +85,11 @@ module.exports = async (req, res) => {
       variant > 0
         ? `\n\n（这是第 ${variant + 1} 次生成，请换一个不同的拆解角度或侧重点，避免与常见套路重复。）`
         : '';
+
+    // Vercel Hobby 函数最长 10s，给上游留 8s 超时，避免函数被平台强制杀掉变成无信息 502
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
     const upstream = await fetch(`${base}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -103,7 +108,9 @@ module.exports = async (req, res) => {
         response_format: { type: 'json_object' },
         temperature: 0.6,
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
 
     if (!upstream.ok) {
       const detail = await upstream.text();
@@ -124,6 +131,11 @@ module.exports = async (req, res) => {
     if (!steps.length) return res.status(502).json({ error: 'EMPTY_STEPS' });
     return res.status(200).json({ steps });
   } catch (e) {
-    return res.status(502).json({ error: 'DECOMPOSE_FAILED', message: String(e && e.message ? e.message : e) });
+    const isTimeout = e && e.name === 'AbortError';
+    const message = isTimeout
+      ? '上游模型接口超时（8s 内未响应），请检查 API 可用性或更换服务商。'
+      : String(e && e.message ? e.message : e);
+    console.error('[decompose] failed:', message, { base, model: model.slice(0, 30) });
+    return res.status(502).json({ error: 'DECOMPOSE_FAILED', message });
   }
 };
