@@ -87,9 +87,10 @@ module.exports = async (req, res) => {
         ? `\n\n（这是第 ${variant + 1} 次生成，请换一个不同的拆解角度或侧重点，避免与常见套路重复。）`
         : '';
 
-    // Vercel Hobby 函数最长 10s，给上游留 8s 超时，避免函数被平台强制杀掉变成无信息 502
+    // Vercel Hobby 函数已通过 vercel.json 配置 maxDuration=60s；这里给上游留 55s 超时，
+    // 避免 DeepSeek V3 生成较长 JSON 时被过早中断（旧值 8s 太短，经常触发超时）
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 55000);
 
     const upstream = await fetch(`${base}/chat/completions`, {
       method: 'POST',
@@ -134,7 +135,7 @@ module.exports = async (req, res) => {
   } catch (e) {
     const isTimeout = e && e.name === 'AbortError';
     const message = isTimeout
-      ? '上游模型接口超时（8s 内未响应），请检查 API 可用性或更换服务商。'
+      ? '上游模型接口超时（55s 内未响应），请检查 API 可用性或更换更快的模型（如 Pro/deepseek-ai/DeepSeek-V3）。'
       : String(e && e.message ? e.message : e);
     console.error('[decompose] failed:', message, { base, model: model.slice(0, 30) });
     return res.status(502).json({ error: 'DECOMPOSE_FAILED', message });
