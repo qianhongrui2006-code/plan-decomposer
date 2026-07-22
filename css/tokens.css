@@ -1,0 +1,114 @@
+/* ============================================================
+   设计令牌 (Design Tokens) — 单一浅色主题
+   计划分解器 · UI Designer
+   ============================================================ */
+
+:root {
+  /* ---------- 颜色：主色（墨绿系）---------- */
+  --color-primary-50:  #ecfdf5;
+  --color-primary-100: #d1fae5;
+  --color-primary-200: #a7f3d0;
+  --color-primary-300: #6ee7b7;
+  --color-primary-400: #34d399;
+  --color-primary-500: #047857;  /* 主色 · 墨绿 */
+  --color-primary-600: #065f46;  /* 主色 hover/active */
+  --color-primary-700: #064e3b;
+
+  /* ---------- 颜色：强调色（当前时间线）---------- */
+  --color-accent-400: #fb923c;
+  --color-accent-500: #f59e0b;
+
+  /* ---------- 语义色 ---------- */
+  --color-success: #10b981;
+  --color-success-bg: #d1fae5;
+  --color-warning: #f59e0b;
+  --color-error:   #ef4444;
+  --color-error-bg: #fee2e2;
+  --color-info:    #3b82f6;
+
+  /* ---------- 中性色 ---------- */
+  --color-bg:        #f8fafc;   /* 页面背景 slate-50 */
+  --color-surface:   #ffffff;   /* 卡片/面板 surface */
+  --color-surface-2: #f1f5f9;   /* 次级背景 slate-100 */
+  --color-surface-3: #e9eef5;   /* 三级背景（hover 态）*/
+  --color-border:    #e2e8f0;   /* 边框 slate-200 */
+  --color-border-strong: #cbd5e1; /* slate-300 */
+
+  --color-text:        #1e293b; /* 主文本 slate-800 */
+  --color-text-muted:  #475569; /* 次级文本 slate-600（对比度≥7:1，达 WCAG AA）*/
+  --color-text-subtle: #94a3b8; /* 弱文本 slate-400 */
+
+  /* ---------- 毛玻璃（Apple 风格 frosted glass）---------- */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-strong: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-shadow: 0 8px 30px -6px rgb(15 23 42 / 0.14);
+  /* 时间块之间的视觉间隔（用在内层卡片，不影响任务真实时间对应） */
+  --block-gap: 8px;
+
+  /* 日历每小时高度：提高分辨率，让 15–30 分钟短任务也能显示时间 */
+  --timeline-hour-height: 120px;
+
+  /* ---------- 字体 ---------- */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC',
+               'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo,
+               Consolas, monospace;
+
+  /* 字号 */
+  --font-size-xs:   0.75rem;   /* 12px */
+  --font-size-sm:   0.875rem;  /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg:   1.125rem;  /* 18px */
+  --font-size-xl:   1.25rem;   /* 20px */
+  --font-size-2xl:  1.5rem;    /* 24px */
+  --font-size-3xl:  1.875rem;  /* 30px */
+
+  /* 字重 */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* 行高 */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
+
+  /* ---------- 间距（4px 基准系统）---------- */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+
+  /* ---------- 圆角 ---------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  /* ---------- 阴影 ---------- */
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.06);
+  --shadow-md: 0 4px 10px -2px rgb(15 23 42 / 0.10);
+  --shadow-lg: 0 12px 24px -6px rgb(15 23 42 / 0.14);
+
+  /* ---------- 过渡 ---------- */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+
+  /* ---------- 尺寸常量 ---------- */
+  --topbar-height: 56px;
+  --panel-left-width: 340px;
+  --panel-right-width: 340px;
+
+  /* 时间线：可视起止小时 */
+  --timeline-start-hour: 0;   /* 00:00 */
+  --timeline-end-hour: 24;    /* 24:00 */
+}

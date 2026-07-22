@@ -1,0 +1,293 @@
+/* ============================================================
+   布局样式 (Layout) — 三栏结构
+   计划分解器 · UI Designer
+   ============================================================ */
+
+/* ---------- 顶部标题栏 ---------- */
+.topbar {
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  background-color: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--glass-border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.topbar__logo {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
+  color: #fff;
+  font-size: var(--font-size-lg);
+}
+
+.topbar__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
+}
+
+.topbar__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* 顶部栏中央：当前计划名（超长省略） */
+.topbar__plan {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 var(--space-3);
+}
+
+/* ---------- 主区域：三栏布局（独立卡片 + 间距，可拖拽调节）---------- */
+.layout {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: var(--space-4);
+  height: calc(100vh - var(--topbar-height) - var(--space-8));
+  overflow: hidden;
+}
+
+/* ---------- 面板通用：圆滑大边框 + 毛玻璃 ---------- */
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background-color: var(--glass-bg);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
+}
+
+/* 侧栏面板默认固定宽，中间面板弹性填充；具体宽度由 JS 按 store 注入 */
+.panel[data-panel="task"],
+.panel[data-panel="detail"] {
+  flex: 0 0 340px;
+  min-width: 0;
+}
+.panel[data-panel="calendar"] {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.panel__header {
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+.panel__head-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--space-3);
+}
+/* 左/右面板：标题靠左 */
+.panel__header:not(.calendar-header) .panel__head-row {
+  justify-content: flex-start;
+}
+/* 日历面板：导航靠左、日期靠右 */
+.calendar-header__row {
+  justify-content: space-between;
+}
+
+.panel__title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+/* 中间日历头部：导航/日期布局见 .panel__head-row */
+
+/* ---------- 面板间分隔区：宽度调节（<||> 抓取提示）---------- */
+.resizer {
+  flex: 0 0 20px;
+  width: 20px;
+  cursor: col-resize;
+  position: relative;
+  background-color: transparent;
+  touch-action: none;
+  z-index: 6;
+  transition: background-color var(--transition-fast);
+}
+.resizer:hover,
+.resizer.is-active {
+  background-color: var(--color-primary-50);
+}
+/* <||> 抓取提示：两道竖条，悬停/拖拽时变品牌色 */
+.resizer__grip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+}
+.resizer__grip i {
+  display: block;
+  width: 3px;
+  height: 26px;
+  border-radius: 3px;
+  background-color: var(--color-text-subtle);
+  transition: background-color var(--transition-fast), height var(--transition-fast);
+}
+.resizer:hover .resizer__grip i,
+.resizer.is-active .resizer__grip i {
+  background-color: var(--color-primary-500);
+  height: 30px;
+}
+body.is-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* ---------- 面板拖拽手柄：顶部居中、横排三个灰色小圆点 ---------- */
+.panel__grip {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: none;
+  background: transparent;
+  cursor: grab;
+  border-radius: var(--radius-sm);
+  flex: 0 0 auto;
+  touch-action: none;
+}
+.panel__grip:hover {
+  background-color: var(--color-surface-2);
+}
+.panel__grip:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+.panel__grip:active {
+  cursor: grabbing;
+}
+.panel__grip-dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--color-text-subtle);
+}
+
+/* ---------- 面板拖拽换位状态 ---------- */
+/* 拖拽中：面板半透明浮起（几何判定落点，不再需要 pointer-events:none） */
+.panel.is-dragging {
+  opacity: 0.9;
+  box-shadow: var(--shadow-lg);
+  z-index: 5;
+  cursor: grabbing;
+}
+/* 落点高亮：显示「将交换到此」的预览 */
+.panel.is-drop-target {
+  outline: 2px dashed var(--color-primary-500);
+  outline-offset: -4px;
+  background-color: var(--color-primary-50);
+}
+.panel.is-resizing-panel {
+  box-shadow: var(--shadow-md);
+}
+body.is-reordering {
+  user-select: none;
+  cursor: grabbing;
+}
+
+.calendar-header__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---------- 日历主体 ---------- */
+.calendar-body {
+  padding: 0;
+  position: relative;
+  overflow-y: auto;
+}
+
+/* ---------- 响应式：窄屏自动堆叠（宽度调节禁用，顺序仍可调）---------- */
+@media (max-width: 768px) {
+  .topbar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: var(--space-3) var(--space-4);
+    row-gap: var(--space-2);
+  }
+  .topbar__plan {
+    order: 3;
+    flex-basis: 100%;
+    text-align: left;
+    padding: 0;
+  }
+  .topbar__actions {
+    margin-left: auto;
+  }
+  .layout {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+  .panel[data-panel] {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+  /* 堆叠后日历需要可滚动高度，否则时间线被压扁 */
+  .panel[data-panel="calendar"] {
+    min-height: 70vh;
+  }
+  .resizer {
+    display: none;
+  }
+}
+
+/* 超窄屏：收起品牌标题，仅留 logo + 操作 */
+@media (max-width: 420px) {
+  .topbar__title {
+    display: none;
+  }
+  .topbar__plan {
+    font-size: var(--font-size-xs);
+  }
+}
