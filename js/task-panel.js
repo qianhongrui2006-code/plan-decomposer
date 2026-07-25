@@ -147,6 +147,7 @@ async function onClarifySubmit(skip) {
     applyDecomposeResult(desc, res);
   } finally {
     clarifyLoading = false;
+    render(); // 追问结束后必须重渲染，否则 store 已更新但 UI 未刷新
   }
 }
 
