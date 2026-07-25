@@ -86,11 +86,7 @@ function render() {
     !done;
   const enrichBanner = needsEnrich
     ? `<div class="detail__enrich">
-         <span class="detail__enrich-text">✨ 此任务暂无详情，AI 可为你补充资源、步骤和验收清单</span>
-         <button class="btn btn--enrich" type="button" data-act="enrich"
-           ${enrichLoading ? 'disabled' : ''}>
-           ${enrichLoading ? '<span class="spinner"></span> 正在补充…' : '🤖 补充详情'}
-         </button>
+         <span class="detail__enrich-text">✨ ${enrichLoading ? '<span class="spinner"></span> AI 正在补充详情…' : '正在准备详情…'}</span>
        </div>`
     : '';
   const resourceSection = `
@@ -192,6 +188,12 @@ function render() {
     </div>`;
 
   bindEvents(step, sched);
+
+  // 自动补充详情：检测到富字段全空时，异步调用 AI 补充
+  if (needsEnrich && !enrichLoading) {
+    enrichLoading = true;
+    setTimeout(() => autoEnrich(step), 100);
+  }
 }
 
 /** 执行步骤 / 验收清单共用的列表区块 HTML（结构同构，仅数据字段与文案不同） */
@@ -328,28 +330,24 @@ function bindEvents(step, sched) {
       store.deleteStep(step.id);
     });
   }
+}
 
-  // 🤖 补充详情按钮：懒加载调用 AI 补充 resource/steps/checklist/output
-  const enrichBtn = bodyEl.querySelector('[data-act="enrich"]');
-  if (enrichBtn) {
-    enrichBtn.addEventListener('click', async () => {
-      enrichLoading = true;
-      render(); // 显示 loading 态
-      const task = store.getTask(step.taskId);
-      const ctx = [task && task.title, step.milestone].filter(Boolean).join(' / ');
-      const data = await enrichTaskStep(step.title, ctx);
-      enrichLoading = false;
-      if (data) {
-        store.updateStepEnrichment(step.id, {
-          resource: data.resource,
-          steps: data.steps,
-          checklist: data.checklist,
-          output: data.output,
-        });
-      }
-      render(); // 重渲染显示结果
+/** 自动补充详情：检测到富字段全空时异步调用 AI，完成后自动刷新面板 */
+async function autoEnrich(step) {
+  const task = store.getTask(step.taskId);
+  const ctx = [task && task.title, step.milestone].filter(Boolean).join(' / ');
+  const data = await enrichTaskStep(step.title, ctx);
+  if (data) {
+    store.updateStepEnrichment(step.id, {
+      resource: data.resource,
+      steps: data.steps,
+      checklist: data.checklist,
+      output: data.output,
     });
   }
+  enrichLoading = false;
+  // 如果用户仍停留在此步骤上，刷新面板显示结果
+  if (selectedStepId === step.id) render();
 }
 
 /** 文本类字段的自动保存绑定：聚焦抑制重渲染，输入即时写回，失焦恢复渲染 */
