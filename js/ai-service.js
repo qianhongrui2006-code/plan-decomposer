@@ -289,3 +289,36 @@ export async function decomposeTask(description, variant = 0, opts = {}) {
     return { ...mockDecompose(description, variant), plan: null, usedMock: true };
   }
 }
+
+/**
+ * 懒加载补充单任务的富字段（resource/steps/checklist/output）。
+ * 用于首次生成骨架后，用户在详情面板点击「补充详情」时按需调用。
+ * 单任务 JSON 极短，15s 内必然完成。失败返回 null（静默降级，不抛错）。
+ * @param {string} taskTitle 任务标题
+ * @param {string} [context] 计划背景（里程碑名/计划标题，帮助 AI 精确匹配资源）
+ * @returns {Promise<{resource:object|null, steps:string[], checklist:string[], output:string}|null>}
+ */
+export async function enrichTaskStep(taskTitle, context = '') {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 14000);
+    const res = await fetch('/api/enrich-task', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ taskTitle, context }),
+      signal: ctrl.signal,
+    });
+    clearTimeout(t);
+    if (!res.ok) return null; // 静默降级
+    const data = await res.json();
+    if (!data || data.error) return null;
+    return {
+      resource: data.resource || null,
+      steps: Array.isArray(data.steps) ? data.steps : [],
+      checklist: Array.isArray(data.checklist) ? data.checklist : [],
+      output: String(data.output || ''),
+    };
+  } catch {
+    return null; // 静默降级，不阻塞用户操作
+  }
+}

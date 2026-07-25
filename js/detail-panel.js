@@ -4,10 +4,12 @@
 // 标题与各字段行内即时自动保存；完成勾选与日历双向同步；删除步骤本身（二次确认）。
 import { store } from './store.js';
 import { timeToMinutes, minutesToTime, durationMinutes } from './utils.js';
+import { enrichTaskStep } from './ai-service.js';
 
 let bodyEl; // #detailPanelBody
 let selectedStepId = null;
 let isEditing = false; // 正在编辑文本字段，抑制自身重渲染以保护输入焦点
+let enrichLoading = false; // 正在 AI 补充详情，显示 loading
 
 /* ---------------- 初始化 ---------------- */
 export function initDetailPanel() {
@@ -75,6 +77,22 @@ function render() {
   const res = step.resource || {};
   const resType = res.type || 'article';
   const hasLink = res.url && /^https?:\/\//i.test(res.url);
+  // 判断是否需要 AI 补充详情（所有富字段都为空时显示 enrichment 横幅）
+  const needsEnrich =
+    !step.resource &&
+    (!Array.isArray(step.subtasks) || !step.subtasks.length) &&
+    (!Array.isArray(step.checklist) || !step.checklist.length) &&
+    !step.output &&
+    !done;
+  const enrichBanner = needsEnrich
+    ? `<div class="detail__enrich">
+         <span class="detail__enrich-text">✨ 此任务暂无详情，AI 可为你补充资源、步骤和验收清单</span>
+         <button class="btn btn--enrich" type="button" data-act="enrich"
+           ${enrichLoading ? 'disabled' : ''}>
+           ${enrichLoading ? '<span class="spinner"></span> 正在补充…' : '🤖 补充详情'}
+         </button>
+       </div>`
+    : '';
   const resourceSection = `
     <section class="detail__section detail__resource">
       <h3 class="detail__label">📎 学习资源</h3>
@@ -159,6 +177,7 @@ function render() {
       </section>
 
       ${resourceSection}
+      ${enrichBanner}
       ${stepsSection}
       ${checkSection}
       ${outputSection}
@@ -307,6 +326,28 @@ function bindEvents(step, sched) {
       const ok = window.confirm('确定删除该步骤吗？其在日历中的排期也会一并移除，且不可恢复。');
       if (!ok) return;
       store.deleteStep(step.id);
+    });
+  }
+
+  // 🤖 补充详情按钮：懒加载调用 AI 补充 resource/steps/checklist/output
+  const enrichBtn = bodyEl.querySelector('[data-act="enrich"]');
+  if (enrichBtn) {
+    enrichBtn.addEventListener('click', async () => {
+      enrichLoading = true;
+      render(); // 显示 loading 态
+      const task = store.getTask(step.taskId);
+      const ctx = [task && task.title, step.milestone].filter(Boolean).join(' / ');
+      const data = await enrichTaskStep(step.title, ctx);
+      enrichLoading = false;
+      if (data) {
+        store.updateStepEnrichment(step.id, {
+          resource: data.resource,
+          steps: data.steps,
+          checklist: data.checklist,
+          output: data.output,
+        });
+      }
+      render(); // 重渲染显示结果
     });
   }
 }

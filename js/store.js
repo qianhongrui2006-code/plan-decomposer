@@ -363,6 +363,33 @@ class Store {
     return step;
   }
 
+  /**
+   * 懒加载补充步骤的富字段（resource/steps/checklist/output）。
+   * 仅当 AI 首次生成时这些字段为空时使用；merge 而非全量覆盖。
+   */
+  updateStepEnrichment(stepId, { resource, steps, checklist, output }) {
+    const step = this.getStep(stepId);
+    if (!step) return null;
+    if (resource && !step.resource) step.resource = resource;
+    if (output && !step.output) step.output = output;
+    if (Array.isArray(steps) && steps.length && (!step.subtasks || !step.subtasks.length)) {
+      step.subtasks = steps.map((x) => ({
+        id: uid('sub'),
+        title: String(x || ''),
+        completed: false,
+      }));
+    }
+    if (Array.isArray(checklist) && checklist.length && (!step.checklist || !step.checklist.length)) {
+      step.checklist = checklist.map((x) => ({
+        id: uid('chk'),
+        title: String(x || ''),
+        completed: false,
+      }));
+    }
+    this._emit();
+    return step;
+  }
+
   deleteStep(id) {
     for (const t of this.state.tasks) {
       const idx = t.steps.findIndex((s) => s.id === id);
