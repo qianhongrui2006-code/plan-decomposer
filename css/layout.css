@@ -10,8 +10,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--space-6);
+<<<<<<< HEAD
   background-color: var(--color-surface-2);
   border-bottom: 2px solid var(--color-border-strong);
+=======
+  background-color: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--glass-border);
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   position: sticky;
   top: 0;
   z-index: 20;
@@ -26,6 +33,7 @@
 .topbar__logo {
   display: inline-grid;
   place-items: center;
+<<<<<<< HEAD
   width: 38px;
   height: 38px;
   border-radius: var(--radius-md);
@@ -34,13 +42,26 @@
   font-size: var(--font-size-lg);
   border: 2px solid var(--color-text);
   box-shadow: var(--shadow-sm);
+=======
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
+  color: #fff;
+  font-size: var(--font-size-lg);
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 }
 
 .topbar__title {
   font-size: var(--font-size-lg);
+<<<<<<< HEAD
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.02em;
   color: var(--color-text);
+=======
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 }
 
 .topbar__actions {
@@ -65,6 +86,7 @@
 .layout {
   display: flex;
   align-items: stretch;
+<<<<<<< HEAD
   gap: var(--space-2);
   padding: var(--space-3);
   height: calc(100vh - var(--topbar-height) - var(--space-6));
@@ -72,15 +94,33 @@
 }
 
 /* ---------- 面板通用：实色大色块 + 粗边框 + 卡通硬阴影 ---------- */
+=======
+  gap: 0;
+  padding: var(--space-4);
+  height: calc(100vh - var(--topbar-height) - var(--space-8));
+  overflow: hidden;
+}
+
+/* ---------- 面板通用：圆滑大边框 + 毛玻璃 ---------- */
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 .panel {
   display: flex;
   flex-direction: column;
   min-height: 0;
+<<<<<<< HEAD
   background-color: var(--color-surface);
   background-image: var(--linen-texture);
   border: 2px solid var(--color-border-strong);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
+=======
+  background-color: var(--glass-bg);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   overflow: hidden;
 }
 
@@ -97,13 +137,21 @@
 
 .panel__header {
   flex: 0 0 auto;
+<<<<<<< HEAD
   padding: var(--space-4);
   border-bottom: 2px dashed var(--color-border);
+=======
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
+<<<<<<< HEAD
   background-color: var(--color-surface-2);
+=======
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 }
 .panel__head-row {
   display: flex;
@@ -122,8 +170,12 @@
 
 .panel__title {
   font-size: var(--font-size-base);
+<<<<<<< HEAD
   font-weight: var(--font-weight-bold);
   color: var(--color-text);
+=======
+  font-weight: var(--font-weight-semibold);
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 }
 
 .panel__body {
@@ -132,6 +184,7 @@
   overflow-y: auto;
   padding: var(--space-4);
 }
+<<<<<<< HEAD
 .panel__body::-webkit-scrollbar {
   width: 8px;
 }
@@ -147,6 +200,15 @@
 .resizer {
   flex: 0 0 16px;
   width: 16px;
+=======
+
+/* 中间日历头部：导航/日期布局见 .panel__head-row */
+
+/* ---------- 面板间分隔区：宽度调节（<||> 抓取提示）---------- */
+.resizer {
+  flex: 0 0 20px;
+  width: 20px;
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   cursor: col-resize;
   position: relative;
   background-color: transparent;
@@ -156,11 +218,17 @@
 }
 .resizer:hover,
 .resizer.is-active {
+<<<<<<< HEAD
   background-color: var(--color-surface-2);
   border-radius: var(--radius-full);
   border: 2px dashed var(--color-border);
 }
 /* <||> 抓取提示 */
+=======
+  background-color: var(--color-primary-50);
+}
+/* <||> 抓取提示：两道竖条，悬停/拖拽时变品牌色 */
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 .resizer__grip {
   position: absolute;
   top: 50%;
@@ -175,16 +243,27 @@
 }
 .resizer__grip i {
   display: block;
+<<<<<<< HEAD
   width: 4px;
   height: 26px;
   border-radius: 4px;
   background-color: var(--color-text-subtle);
   border: 1px solid var(--color-text);
+=======
+  width: 3px;
+  height: 26px;
+  border-radius: 3px;
+  background-color: var(--color-text-subtle);
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   transition: background-color var(--transition-fast), height var(--transition-fast);
 }
 .resizer:hover .resizer__grip i,
 .resizer.is-active .resizer__grip i {
+<<<<<<< HEAD
   background-color: var(--color-primary-400);
+=======
+  background-color: var(--color-primary-500);
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   height: 30px;
 }
 body.is-resizing {
@@ -192,7 +271,11 @@ body.is-resizing {
   user-select: none;
 }
 
+<<<<<<< HEAD
 /* ---------- 面板拖拽手柄：顶部居中、横排三个彩色小圆点 ---------- */
+=======
+/* ---------- 面板拖拽手柄：顶部居中、横排三个灰色小圆点 ---------- */
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 .panel__grip {
   display: inline-flex;
   flex-direction: row;
@@ -203,22 +286,35 @@ body.is-resizing {
   border: none;
   background: transparent;
   cursor: grab;
+<<<<<<< HEAD
   border-radius: var(--radius-md);
+=======
+  border-radius: var(--radius-sm);
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   flex: 0 0 auto;
   touch-action: none;
 }
 .panel__grip:hover {
+<<<<<<< HEAD
   background-color: var(--color-surface-3);
 }
 .panel__grip:focus-visible {
   outline: 3px solid var(--color-primary-400);
   outline-offset: 3px;
+=======
+  background-color: var(--color-surface-2);
+}
+.panel__grip:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 }
 .panel__grip:active {
   cursor: grabbing;
 }
 .panel__grip-dot {
   display: block;
+<<<<<<< HEAD
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -243,6 +339,30 @@ body.is-resizing {
 }
 .panel.is-resizing-panel {
   box-shadow: var(--shadow-lg);
+=======
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--color-text-subtle);
+}
+
+/* ---------- 面板拖拽换位状态 ---------- */
+/* 拖拽中：面板半透明浮起（几何判定落点，不再需要 pointer-events:none） */
+.panel.is-dragging {
+  opacity: 0.9;
+  box-shadow: var(--shadow-lg);
+  z-index: 5;
+  cursor: grabbing;
+}
+/* 落点高亮：显示「将交换到此」的预览 */
+.panel.is-drop-target {
+  outline: 2px dashed var(--color-primary-500);
+  outline-offset: -4px;
+  background-color: var(--color-primary-50);
+}
+.panel.is-resizing-panel {
+  box-shadow: var(--shadow-md);
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 }
 body.is-reordering {
   user-select: none;
@@ -262,7 +382,11 @@ body.is-reordering {
   overflow-y: auto;
 }
 
+<<<<<<< HEAD
 /* ---------- 响应式：窄屏自动堆叠 ---------- */
+=======
+/* ---------- 响应式：窄屏自动堆叠（宽度调节禁用，顺序仍可调）---------- */
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 @media (max-width: 768px) {
   .topbar {
     flex-wrap: wrap;
@@ -283,12 +407,19 @@ body.is-reordering {
     flex-direction: column;
     height: auto;
     overflow: visible;
+<<<<<<< HEAD
     gap: var(--space-2);
+=======
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   }
   .panel[data-panel] {
     width: 100%;
     flex: 1 1 auto;
   }
+<<<<<<< HEAD
+=======
+  /* 堆叠后日历需要可滚动高度，否则时间线被压扁 */
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   .panel[data-panel="calendar"] {
     min-height: 70vh;
   }
