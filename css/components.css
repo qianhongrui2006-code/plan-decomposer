@@ -1106,6 +1106,40 @@
 .clarify-card__input {
   background-color: #fff;
 }
+/* 候选答案 chips：点击快速填入输入框 */
+.clarify-card__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.clarify-card__chip {
+  padding: 2px var(--space-3);
+  border: 2px solid var(--color-pink-strong);
+  border-radius: var(--radius-full);
+  background-color: #fff;
+  color: var(--color-pink-strong);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  box-shadow: 1px 1px 0 var(--color-pink-strong);
+  transition: background-color var(--transition-fast),
+              transform var(--transition-fast),
+              box-shadow var(--transition-fast);
+}
+.clarify-card__chip:hover:not(:disabled) {
+  background-color: var(--color-pink);
+  color: #fff;
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 var(--color-pink-strong);
+}
+.clarify-card__chip:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+.clarify-card__chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .clarify-card__actions {
   display: flex;
   justify-content: flex-end;
