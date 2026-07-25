@@ -49,7 +49,7 @@ class LocalStorageAdapter extends StorageAdapter {
    常量与默认值
    ============================================================ */
 const STORAGE_KEY = 'state';
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 export const PANEL_IDS = ['task', 'calendar', 'detail'];
 export const CENTER_PANEL = 'calendar'; // 中间面板始终弹性填充，不存固定宽度
@@ -74,12 +74,34 @@ function defaultState() {
 }
 
 /* ============================================================
-   数据结构（与 PRD 6 一致）
-   Task      { id, title, description, createdAt, steps: Step[] }
-   Step      { id, taskId, title, standard, estimatedMinutes, order, subtasks: Subtask[] }
-   Subtask   { id, title, completed }
+   数据结构（schema v2）
+   Task      { id, title, description, createdAt, steps: Step[],
+               milestones: Milestone[], dailyCapacity }
+   Milestone { title, dayRange, deliverable }   // 计划级阶段元信息（AI 生成）
+   Step      { id, taskId, title, standard, estimatedMinutes, order,
+               milestone, day, resource, output,
+               subtasks: Subtask[], checklist: CheckItem[] }
+   Resource  { name, url, type }                // type: article|video|practice|other
+   Subtask / CheckItem { id, title, completed } // 执行步骤 / 验收清单（同构）
    ScheduleItem { id, stepId, date, startTime, endTime, completed, note }
    ============================================================ */
+
+/** v1 → v2 迁移：为旧数据补齐新字段（保留全部用户内容，不清空） */
+function migrateV1toV2(saved) {
+  saved.version = 2;
+  (saved.tasks || []).forEach((t) => {
+    if (!Array.isArray(t.milestones)) t.milestones = [];
+    if (typeof t.dailyCapacity !== 'string') t.dailyCapacity = '';
+    (t.steps || []).forEach((s) => {
+      if (!Array.isArray(s.checklist)) s.checklist = [];
+      if (s.resource === undefined) s.resource = null;
+      if (typeof s.output !== 'string') s.output = '';
+      if (s.milestone === undefined) s.milestone = null;
+      if (s.day === undefined) s.day = null;
+    });
+  });
+  return saved;
+}
 
 class Store {
   constructor(adapter) {
@@ -90,9 +112,19 @@ class Store {
 
   /** 加载并做版本校验 / 迁移 */
   _load() {
-    const saved = this.adapter.load(STORAGE_KEY);
-    if (!saved || saved.version !== SCHEMA_VERSION) {
-      // 版本不符：未来可在此做迁移；当前直接重置为默认
+    let saved = this.adapter.load(STORAGE_KEY);
+    if (!saved) {
+      const fresh = defaultState();
+      this.adapter.save(STORAGE_KEY, fresh);
+      return fresh;
+    }
+    // v1 → v2：补字段迁移（保留用户数据）
+    if (saved.version === 1) {
+      saved = migrateV1toV2(saved);
+      this.adapter.save(STORAGE_KEY, saved);
+    }
+    if (saved.version !== SCHEMA_VERSION) {
+      // 未知版本：无法安全迁移，重置为默认
       const fresh = defaultState();
       this.adapter.save(STORAGE_KEY, fresh);
       return fresh;
@@ -170,13 +202,22 @@ class Store {
    * 用一份全新的分解结果替换「当前计划」。
    * 设计为单计划模型：左侧始终只维护一份当前任务。
    * 替换会清空旧的日程（旧步骤已失效），并在一次 emit 内完成。
+   * plan：AI 返回的计划级元信息 { title, dailyCapacity, milestones }（可为 null）。
    */
-  replaceCurrentTask({ title, description = '', steps = [] }) {
+  replaceCurrentTask({ title, description = '', steps = [], plan = null }) {
     const task = {
       id: uid('task'),
       title,
       description,
       createdAt: Date.now(),
+      milestones: Array.isArray(plan && plan.milestones)
+        ? plan.milestones.map((m) => ({
+            title: String(m.title || ''),
+            dayRange: String(m.dayRange || m.day_range || ''),
+            deliverable: String(m.deliverable || ''),
+          }))
+        : [],
+      dailyCapacity: String((plan && (plan.dailyCapacity || plan.daily_capacity)) || ''),
       steps: steps.map((s, i) => ({
         id: uid('step'),
         taskId: '', // 下方补填
@@ -185,8 +226,23 @@ class Store {
         estimatedMinutes: s.estimatedMinutes || 30,
         completed: false,
         order: i,
+        milestone: s.milestone || null,
+        day: Number.isFinite(s.day) ? s.day : null,
+        resource: s.resource
+          ? {
+              name: String(s.resource.name || ''),
+              url: String(s.resource.url || ''),
+              type: String(s.resource.type || 'article'),
+            }
+          : null,
+        output: s.output || '',
         subtasks: (s.subtasks || []).map((x) => ({
           id: uid('sub'),
+          title: x.title,
+          completed: !!x.completed,
+        })),
+        checklist: (s.checklist || []).map((x) => ({
+          id: uid('chk'),
           title: x.title,
           completed: !!x.completed,
         })),
@@ -213,49 +269,71 @@ class Store {
       estimatedMinutes,
       completed: false,
       order: order ?? task.steps.length,
+      milestone: null,
+      day: null,
+      resource: null,
+      output: '',
       subtasks: (subtasks || []).map((x) => ({
         id: uid('sub'),
         title: x.title,
         completed: !!x.completed,
       })),
+      checklist: [],
     };
     task.steps.push(step);
     this._emit();
     return step;
   }
 
-  /** 新增子任务（AI 分解或用户手动补充） */
-  addSubtask(stepId, title) {
+  /* ---------------- 步骤列表项（subtasks 执行步骤 / checklist 验收清单，同构） ---------------- */
+
+  /** 通用：向步骤的列表字段添加条目（field: 'subtasks' | 'checklist'） */
+  addStepListItem(stepId, field, title) {
     const step = this.getStep(stepId);
-    if (!step) return null;
-    if (!Array.isArray(step.subtasks)) step.subtasks = [];
-    const sub = {
-      id: uid('sub'),
+    if (!step || (field !== 'subtasks' && field !== 'checklist')) return null;
+    if (!Array.isArray(step[field])) step[field] = [];
+    const item = {
+      id: uid(field === 'subtasks' ? 'sub' : 'chk'),
       title: String(title).trim(),
       completed: false,
     };
-    if (!sub.title) return null;
-    step.subtasks.push(sub);
+    if (!item.title) return null;
+    step[field].push(item);
     this._emit();
-    return sub;
+    return item;
   }
 
-  /** 切换子任务完成态（「打勾」效果的数据来源） */
-  toggleSubtask(stepId, subtaskId) {
+  /** 通用：切换列表项完成态（「打勾」效果的数据来源） */
+  toggleStepListItem(stepId, field, itemId) {
     const step = this.getStep(stepId);
-    if (!step || !Array.isArray(step.subtasks)) return;
-    const sub = step.subtasks.find((s) => s.id === subtaskId);
-    if (!sub) return;
-    sub.completed = !sub.completed;
+    if (!step || !Array.isArray(step[field])) return;
+    const item = step[field].find((s) => s.id === itemId);
+    if (!item) return;
+    item.completed = !item.completed;
     this._emit();
+  }
+
+  /** 通用：删除列表项 */
+  deleteStepListItem(stepId, field, itemId) {
+    const step = this.getStep(stepId);
+    if (!step || !Array.isArray(step[field])) return;
+    step[field] = step[field].filter((s) => s.id !== itemId);
+    this._emit();
+  }
+
+  /** 新增子任务（AI 分解或用户手动补充） */
+  addSubtask(stepId, title) {
+    return this.addStepListItem(stepId, 'subtasks', title);
+  }
+
+  /** 切换子任务完成态 */
+  toggleSubtask(stepId, subtaskId) {
+    return this.toggleStepListItem(stepId, 'subtasks', subtaskId);
   }
 
   /** 删除子任务 */
   deleteSubtask(stepId, subtaskId) {
-    const step = this.getStep(stepId);
-    if (!step || !Array.isArray(step.subtasks)) return;
-    step.subtasks = step.subtasks.filter((s) => s.id !== subtaskId);
-    this._emit();
+    return this.deleteStepListItem(stepId, 'subtasks', subtaskId);
   }
 
   /** 切换步骤完成态（同步其所有日程的完成态） */

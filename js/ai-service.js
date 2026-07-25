@@ -184,17 +184,18 @@ function buildFallback(description) {
 }
 
 /**
- * 为单步生成 AI 子任务提示（Mock）。
- * 真实模型接入后由 decomposeTask 直接产出 subtasks，此处仅作演示填充。
+ * 为单步生成子任务提示（Mock）。
+ * 真实模型接入后由 decomposeTask 直接产出具体执行步骤，此处仅作演示填充。
+ * 注意：避免「确认输入→执行自检→记录问题」这类放之四海皆准的模板句，
+ * 至少做到动作导向、与该步主题绑定。
  * @param {{title:string}} step
  * @returns {Array<{title:string, completed:boolean}>}
  */
 function seedSubtasks(step) {
   const t = step.title || '这一步';
   return [
-    { title: `确认「${t}」的输入与产出标准`, completed: false },
-    { title: `执行「${t}」并自检结果`, completed: false },
-    { title: `记录「${t}」的问题与改进点`, completed: false },
+    { title: `列出「${t}」的 3 个关键要点`, completed: false },
+    { title: `动手完成「${t}」的最小可交付版本`, completed: false },
   ];
 }
 
@@ -232,14 +233,22 @@ export function mockDecompose(description, variant = 0) {
  * 分解任务（异步）：优先调用真实 AI（/api/decompose），失败/未配置则回退本地 Mock。
  * @param {string} description 用户描述的计划
  * @param {number} variant 方案变体序号
- * @returns {Promise<{ steps: Array, usedMock: boolean }>}
+ * @param {{ answers?: Array<{q:string,a:string}>, skipClarify?: boolean }} [opts]
+ *   answers：用户对 AI 追问的回答（带上后后端直接生成计划）；
+ *   skipClarify：要求后端跳过追问直接生成。
+ * @returns {Promise<{ steps?: Array, plan?: object|null, questions?: string[], usedMock: boolean }>}
+ *   返回 questions 表示 AI 认为信息不足，需要前端先收集回答；返回 steps 表示已生成。
  */
-export async function decomposeTask(description, variant = 0) {
+export async function decomposeTask(description, variant = 0, opts = {}) {
+  const payload = { description, variant };
+  if (Array.isArray(opts.answers) && opts.answers.length) payload.answers = opts.answers;
+  if (opts.skipClarify) payload.skipClarify = true;
+
   try {
     const res = await fetch('/api/decompose', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description, variant }),
+      body: JSON.stringify(payload),
     });
     if (!res.ok) {
       // 尝试解析后端返回的结构化错误（含上游服务商真实报错）
@@ -262,13 +271,17 @@ export async function decomposeTask(description, variant = 0) {
       throw new Error(`HTTP ${res.status}`);
     }
     const data = await res.json();
+    // AI 追问：信息不足，先返回澄清问题（前端收集回答后再次调用）
+    if (data && Array.isArray(data.questions) && data.questions.length) {
+      return { questions: data.questions, usedMock: false };
+    }
     if (!data || !Array.isArray(data.steps) || !data.steps.length) {
       throw new Error('empty steps');
     }
-    return { steps: data.steps, usedMock: false };
+    return { steps: data.steps, plan: data.plan || null, usedMock: false };
   } catch (e) {
     if (e && e.isUpstream) throw e; // 上游错误：透传给调用方显示，不回退 Mock
     // 未配置 AI_API_KEY、网络错误、解析失败等其他情况 → 回退本地模板，保证始终可用
-    return { ...mockDecompose(description, variant), usedMock: true };
+    return { ...mockDecompose(description, variant), plan: null, usedMock: true };
   }
 }

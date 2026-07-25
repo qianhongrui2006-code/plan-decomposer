@@ -1,6 +1,7 @@
 // detail-panel.js — 右侧任务详情面板（Step 6）
-// 监听 step:select（左侧步骤卡）/ timeblock:select（日历时间块）渲染选中步骤的详情；
-// 标题与描述行内即时自动保存；完成勾选与日历双向同步；删除步骤本身（二次确认）。
+// 监听 step:select（左侧步骤卡）/ timeblock:select（日历时间块）渲染选中步骤的详情。
+// 结构（按优化意见）：时间安排 + 📎学习资源 + 🪜执行步骤 + ✅验收清单 + 📤产出物；
+// 标题与各字段行内即时自动保存；完成勾选与日历双向同步；删除步骤本身（二次确认）。
 import { store } from './store.js';
 import { timeToMinutes, minutesToTime, durationMinutes } from './utils.js';
 
@@ -70,39 +71,74 @@ function render() {
         ? ''
         : '<button class="btn btn--ghost btn--block detail__arrange" type="button">＋ 安排到今天</button>');
 
-  // 子任务（AI 分解生成，或用户手动添加）；含完成态与进度统计
-  const subs = Array.isArray(step.subtasks) ? step.subtasks : [];
-  const doneCount = subs.filter((s) => s.completed).length;
-  const subtaskSection = `
-    <section class="detail__section detail__subtasks">
-      <div class="detail__subtasks-head">
-        <h3 class="detail__label">子任务</h3>
-        ${subs.length ? `<span class="detail__subtasks-progress">${doneCount}/${subs.length}</span>` : ''}
+  // 📎 学习资源：类型 + 名称 + 链接/关键词（均可编辑；链接为 http 时给「打开」入口）
+  const res = step.resource || {};
+  const resType = res.type || 'article';
+  const hasLink = res.url && /^https?:\/\//i.test(res.url);
+  const resourceSection = `
+    <section class="detail__section detail__resource">
+      <h3 class="detail__label">📎 学习资源</h3>
+      <div class="detail__res-row">
+        <select class="detail__res-type" aria-label="资源类型" ${disabled}>
+          <option value="article" ${resType === 'article' ? 'selected' : ''}>文章</option>
+          <option value="video" ${resType === 'video' ? 'selected' : ''}>视频</option>
+          <option value="practice" ${resType === 'practice' ? 'selected' : ''}>实践</option>
+          <option value="other" ${resType === 'other' ? 'selected' : ''}>其他</option>
+        </select>
+        <input class="form-input detail__res-name" type="text"
+          value="${escapeHtml(res.name || '')}" placeholder="资源名称（如 MDN Flexbox）"
+          aria-label="资源名称" ${disabled} />
       </div>
-      ${
-        subs.length
-          ? `<ul class="subtasks">
-              ${subs
-                .map(
-                  (s) =>
-                    `<li class="subtask${s.completed ? ' is-done' : ''}">
-                      <label class="subtask__row">
-                        <input type="checkbox" data-act="toggle-sub" data-sub="${s.id}" ${s.completed ? 'checked' : ''} ${disabled} />
-                        <span class="subtask__title">${escapeHtml(s.title)}</span>
-                      </label>
-                      <button class="subtask__del" type="button" data-act="del-sub" data-sub="${s.id}" aria-label="删除子任务" ${disabled}>✕</button>
-                    </li>`
-                )
-                .join('')}
-            </ul>`
-          : `<p class="detail__hint">暂无子任务。可手动添加，或重新 AI 分解以生成子任务提示。</p>`
-      }
-      <div class="detail__subtasks-add">
-        <input class="form-input detail__subtask-input" type="text"
-          placeholder="添加子任务…" aria-label="添加子任务" ${disabled} />
-        <button class="btn btn--ghost detail__subtask-add" type="button" ${disabled}>＋ 添加</button>
-      </div>
+      <input class="form-input detail__res-url" type="text"
+        value="${escapeHtml(res.url || '')}" placeholder="链接或精确搜索关键词"
+        aria-label="资源链接或关键词" ${disabled} />
+      ${hasLink ? `<a class="detail__res-link" href="${escapeHtml(res.url)}" target="_blank" rel="noopener noreferrer">打开资源 ↗</a>` : ''}
     </section>`;
+
+  // 🪜 执行步骤（AI 分解生成的具体动作，可勾选、增删）
+  const subs = Array.isArray(step.subtasks) ? step.subtasks : [];
+  const subsDone = subs.filter((s) => s.completed).length;
+  const stepsSection = checklistSectionHTML({
+    items: subs,
+    doneCount: subsDone,
+    label: '🪜 执行步骤',
+    field: 'subtasks',
+    toggleAct: 'toggle-sub',
+    delAct: 'del-sub',
+    emptyHint: '暂无执行步骤。可手动添加，或由 AI 分解生成。',
+    addPlaceholder: '添加执行步骤…',
+    disabled,
+  });
+
+  // ✅ 验收清单（做完后怎么自查）
+  const cls = Array.isArray(step.checklist) ? step.checklist : [];
+  const clsDone = cls.filter((s) => s.completed).length;
+  const checkSection = checklistSectionHTML({
+    items: cls,
+    doneCount: clsDone,
+    label: '✅ 验收清单',
+    field: 'checklist',
+    toggleAct: 'toggle-cl',
+    delAct: 'del-cl',
+    emptyHint: '暂无验收清单。做完后用什么标准自查？',
+    addPlaceholder: '添加验收检查项…',
+    disabled,
+  });
+
+  // 📤 产出物（这一步做完要留下什么；旧数据的 standard 作为初始值承接）
+  const outputVal = step.output || step.standard || '';
+  const outputSection = `
+    <section class="detail__section">
+      <h3 class="detail__label">📤 产出物</h3>
+      <textarea class="form-textarea detail__output"
+        placeholder="这一步做完要留下什么？（链接 / 文件 / 笔记 / 截图）"
+        aria-label="产出物" ${disabled}>${escapeHtml(outputVal)}</textarea>
+    </section>`;
+
+  // 所属里程碑（有则显示在头部元信息里）
+  const msChip = step.milestone
+    ? `<span class="detail__milestone" title="所属阶段">🏁 ${escapeHtml(step.milestone)}</span>`
+    : '';
 
   bodyEl.innerHTML = `
     <div class="detail">
@@ -112,6 +148,7 @@ function render() {
           aria-label="步骤标题" ${disabled} />
         <div class="detail__meta">
           <span class="step-card__status status--${status}">${statusText}</span>
+          ${msChip}
           <span class="detail__parent" title="所属计划">${escapeHtml(task ? task.title : '—')}</span>
         </div>
       </div>
@@ -121,13 +158,10 @@ function render() {
         ${timeSection}
       </section>
 
-      <section class="detail__section">
-        <h3 class="detail__label">执行标准 / 描述</h3>
-        <textarea class="form-textarea detail__desc"
-          placeholder="填写这一步的执行标准或备注…" aria-label="执行标准或描述" ${disabled}>${escapeHtml(step.standard || '')}</textarea>
-      </section>
-
-      ${subtaskSection}
+      ${resourceSection}
+      ${stepsSection}
+      ${checkSection}
+      ${outputSection}
 
       <section class="detail__section detail__footer">
         <label class="detail__check">
@@ -141,59 +175,112 @@ function render() {
   bindEvents(step, sched);
 }
 
+/** 执行步骤 / 验收清单共用的列表区块 HTML（结构同构，仅数据字段与文案不同） */
+function checklistSectionHTML({ items, doneCount, label, field, toggleAct, delAct, emptyHint, addPlaceholder, disabled }) {
+  return `
+    <section class="detail__section detail__subtasks" data-field="${field}">
+      <div class="detail__subtasks-head">
+        <h3 class="detail__label">${label}</h3>
+        ${items.length ? `<span class="detail__subtasks-progress">${doneCount}/${items.length}</span>` : ''}
+      </div>
+      ${
+        items.length
+          ? `<ul class="subtasks">
+              ${items
+                .map(
+                  (s) =>
+                    `<li class="subtask${s.completed ? ' is-done' : ''}">
+                      <label class="subtask__row">
+                        <input type="checkbox" data-act="${toggleAct}" data-sub="${s.id}" ${s.completed ? 'checked' : ''} ${disabled} />
+                        <span class="subtask__title">${escapeHtml(s.title)}</span>
+                      </label>
+                      <button class="subtask__del" type="button" data-act="${delAct}" data-sub="${s.id}" aria-label="删除" ${disabled}>✕</button>
+                    </li>`
+                )
+                .join('')}
+            </ul>`
+          : `<p class="detail__hint">${emptyHint}</p>`
+      }
+      <div class="detail__subtasks-add">
+        <input class="form-input detail__list-input" type="text"
+          placeholder="${addPlaceholder}" aria-label="${addPlaceholder}" ${disabled} />
+        <button class="btn btn--ghost detail__list-add" type="button" ${disabled}>＋ 添加</button>
+      </div>
+    </section>`;
+}
+
 /* ---------------- 事件绑定 ---------------- */
 function bindEvents(step, sched) {
   const titleInput = bodyEl.querySelector('.detail__title');
-  const descInput = bodyEl.querySelector('.detail__desc');
   const check = bodyEl.querySelector('[data-act="toggle-done"]');
   const arrangeBtn = bodyEl.querySelector('.detail__arrange');
   const delBtn = bodyEl.querySelector('.detail__delete');
 
   // 标题：聚焦期间抑制自身重渲染，输入即写回 store（即时自动保存）
-  if (titleInput) {
-    titleInput.addEventListener('focus', () => { isEditing = true; });
-    titleInput.addEventListener('blur', onEditBlur);
-    titleInput.addEventListener('input', () => {
-      store.updateStep(step.id, { title: titleInput.value });
-    });
-  }
-  // 描述：同上；并随内容自动撑高（生成多少文字就有多大）
-  if (descInput) {
-    descInput.addEventListener('focus', () => { isEditing = true; });
-    descInput.addEventListener('blur', onEditBlur);
-    descInput.addEventListener('input', () => {
-      store.updateStep(step.id, { standard: descInput.value });
-      autoResize(descInput); // 边输入边撑高
-    });
-    autoResize(descInput);
-  }
-  // 子任务：勾选切换完成态（打勾效果）、删除、手动添加
-  bodyEl.querySelectorAll('[data-act="toggle-sub"]').forEach((cb) => {
-    cb.addEventListener('change', () => {
-      store.toggleSubtask(step.id, cb.dataset.sub);
-    });
+  bindAutoSaveText(titleInput, () => {
+    store.updateStep(step.id, { title: titleInput.value });
   });
-  bodyEl.querySelectorAll('[data-act="del-sub"]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      store.deleteSubtask(step.id, btn.dataset.sub);
+
+  // 📎 学习资源：三个字段合并为一个 resource 对象写回
+  const resTypeEl = bodyEl.querySelector('.detail__res-type');
+  const resNameEl = bodyEl.querySelector('.detail__res-name');
+  const resUrlEl = bodyEl.querySelector('.detail__res-url');
+  const saveResource = () => {
+    const name = resNameEl.value.trim();
+    const url = resUrlEl.value.trim();
+    const type = resTypeEl.value;
+    store.updateStep(step.id, {
+      resource: name || url ? { name, url, type } : null,
     });
-  });
-  const subtaskInput = bodyEl.querySelector('.detail__subtask-input');
-  const addSub = () => {
-    if (!subtaskInput) return;
-    const v = subtaskInput.value.trim();
-    if (!v) return;
-    store.addSubtask(step.id, v); // 写入后由 onStoreChange 重渲染，输入框自动清空
   };
-  if (subtaskInput) {
-    bodyEl.querySelector('.detail__subtask-add')?.addEventListener('click', addSub);
-    subtaskInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        addSub();
-      }
+  [resTypeEl, resNameEl, resUrlEl].forEach((el) => {
+    if (!el) return;
+    el.addEventListener('focus', () => { isEditing = true; });
+    el.addEventListener('blur', onEditBlur);
+  });
+  if (resNameEl) resNameEl.addEventListener('input', saveResource);
+  if (resUrlEl) resUrlEl.addEventListener('input', saveResource);
+  if (resTypeEl) resTypeEl.addEventListener('change', saveResource);
+
+  // 🪜 执行步骤 / ✅ 验收清单：两个同构区块分别绑定（按 data-field 区分写入字段）
+  bodyEl.querySelectorAll('.detail__subtasks[data-field]').forEach((section) => {
+    const field = section.dataset.field; // 'subtasks' | 'checklist'
+    section.querySelectorAll('[data-act^="toggle-"]').forEach((cb) => {
+      cb.addEventListener('change', () => {
+        store.toggleStepListItem(step.id, field, cb.dataset.sub);
+      });
     });
-  }
+    section.querySelectorAll('[data-act^="del-"]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        store.deleteStepListItem(step.id, field, btn.dataset.sub);
+      });
+    });
+    const input = section.querySelector('.detail__list-input');
+    const addItem = () => {
+      if (!input) return;
+      const v = input.value.trim();
+      if (!v) return;
+      store.addStepListItem(step.id, field, v); // 写入后由 onStoreChange 重渲染，输入框自动清空
+    };
+    section.querySelector('.detail__list-add')?.addEventListener('click', addItem);
+    if (input) {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addItem();
+        }
+      });
+    }
+  });
+
+  // 📤 产出物：自动保存 + 随内容撑高
+  const outputEl = bodyEl.querySelector('.detail__output');
+  bindAutoSaveText(outputEl, () => {
+    store.updateStep(step.id, { output: outputEl.value });
+    autoResize(outputEl);
+  });
+  autoResize(outputEl);
+
   // 完成勾选：与日历双向同步
   if (check) {
     check.addEventListener('change', () => {
@@ -222,6 +309,14 @@ function bindEvents(step, sched) {
       store.deleteStep(step.id);
     });
   }
+}
+
+/** 文本类字段的自动保存绑定：聚焦抑制重渲染，输入即时写回，失焦恢复渲染 */
+function bindAutoSaveText(el, onInput) {
+  if (!el) return;
+  el.addEventListener('focus', () => { isEditing = true; });
+  el.addEventListener('blur', onEditBlur);
+  el.addEventListener('input', onInput);
 }
 
 /** 编辑失焦：解除抑制并重渲染，使只读区（状态/时间）同步最新值 */

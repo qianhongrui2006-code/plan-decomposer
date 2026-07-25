@@ -19,11 +19,17 @@ import {
 const DAY_START = 0;
 const DAY_END = 24;
 
-let bodyEl, timelineEl, gridEl, blocksEl, nowLineEl;
+let bodyEl, timelineEl, gridEl, blocksEl, nowLineEl, checkpointEl;
 let nowTimer = null;
 let lastSig = '';
 let lastDate = '';
 let selectedStepId = null; // 当前选中的步骤（来自左栏卡片或时间块点击），用于高亮对应时间块
+let filterMilestone = null; // 左栏阶段头点击筛选：非该里程碑的时间块暗淡显示
+
+/** 资源类型 → 中文标签 */
+function resTypeLabel(type) {
+  return { article: '文章', video: '视频', practice: '实践' }[type] || '资源';
+}
 
 /** 读取令牌中的每小时像素高度，JS 与 CSS 共用同一基准 */
 function hourHeightPx() {
@@ -71,7 +77,9 @@ function renderBlocks() {
   // 布局按「内层卡片高度 = 外层时间槽高度 − 间隔」判定：
   // - cardH < 18px：极短块，只显示时间（标题进 aria-label）
   // - ≥ 18px：统一单行显示「标题 + 时间」，标题省略、时间固定右侧，避免标题/时间黏连或换行
+  // - ≥ 44px 且有资源：追加第二行「资源胶囊」（类型 + 资源名）
   const MICRO_PX = 18;
+  const RICH_PX = 44;
   const date = store.getState().currentDate;
   const items = store.getScheduleByDate(date);
   // 时间精确渲染：外层 .time-block 占满真实时间槽（top/height 与时刻一一对应）；
@@ -84,11 +92,18 @@ function renderBlocks() {
     const height = Math.max(dur * pxPerMin, MIN_SLOT);
     const cardH = Math.max(height - gap, 2);
     const isMicro = cardH < MICRO_PX;
-    const done = !!store.getStep(it.stepId)?.completed;
+    const step = store.getStep(it.stepId);
+    const done = !!step?.completed;
+    const res = step && step.resource && step.resource.name ? step.resource : null;
+    const showRes = !isMicro && cardH >= RICH_PX && !!res;
+    // 阶段筛选：非该里程碑的块暗淡（不清除，保留位置感）
+    const dimmed =
+      !!filterMilestone && (step ? step.milestone || '' : '') !== filterMilestone;
     const cls = 'time-block' +
       (done ? ' is-done' : '') +
       (isMicro ? ' is-micro' : '') +
-      (it.stepId === selectedStepId ? ' is-selected' : '');
+      (it.stepId === selectedStepId ? ' is-selected' : '') +
+      (dimmed ? ' is-dimmed' : '');
     const draggable = done ? 'false' : 'true';
     const check = done
       ? '<label class="time-block__check" title="标记完成">' +
@@ -97,22 +112,77 @@ function renderBlocks() {
         '<input type="checkbox" data-act="toggle-done" /></label>';
     const title = escapeHtml(stepTitle(it.stepId));
     const time = `${it.startTime}–${it.endTime}`;
-    const body = isMicro
-      ? `<div class="time-block__time">${time}</div>`
-      : `<div class="time-block__title">${title}</div>` +
+    let body;
+    if (isMicro) {
+      body = `<div class="time-block__time">${time}</div>`;
+    } else if (showRes) {
+      body =
+        `<div class="time-block__row">` +
+          `<div class="time-block__title">${title}</div>` +
+          `<div class="time-block__time">${time}</div>` +
+        `</div>` +
+        `<div class="time-block__res"><i>${resTypeLabel(res.type)}</i><span>${escapeHtml(res.name)}</span></div>`;
+    } else {
+      body =
+        `<div class="time-block__title">${title}</div>` +
         `<div class="time-block__time">${time}</div>`;
+    }
     return (
       `<div class="${cls}" data-id="${it.id}" data-step="${it.stepId}" ` +
       `draggable="${draggable}" ` +
       `style="top:${top}px;height:${height}px" tabindex="0" role="button" ` +
       `aria-label="${title} ${time}">` +
-        `<div class="time-block__card">` +
+        `<div class="time-block__card${showRes ? ' is-rich' : ''}">` +
           check +
           body +
         `</div>` +
       `</div>`
     );
   }).join('');
+}
+
+/** 底部「本日检查点」条：今日任务进度 + 当前里程碑交付物（sticky 吸附日历底部） */
+function renderCheckpoint() {
+  if (!checkpointEl) return;
+  const date = store.getState().currentDate;
+  const items = store.getScheduleByDate(date);
+  const task = store.getState().tasks[0];
+  const hasPlan = !!(task && task.steps && task.steps.length);
+
+  // 无排程：仅「今天 + 已有计划」时给引导，其余情况隐藏
+  if (!items.length) {
+    if (isTodayView() && hasPlan) {
+      checkpointEl.hidden = false;
+      checkpointEl.innerHTML =
+        `<span class="today-checkpoint__icon" aria-hidden="true">🎯</span>` +
+        `<span>今天还没有安排任务，把左侧任务拖进来开始执行吧</span>`;
+    } else {
+      checkpointEl.hidden = true;
+    }
+    return;
+  }
+
+  const done = items.filter((it) => {
+    const s = store.getStep(it.stepId);
+    return !!s?.completed;
+  }).length;
+
+  // 检查点锚点：第一个未完成任务的里程碑交付物；全部完成则用最后一块的里程碑
+  const steps = items.map((it) => store.getStep(it.stepId)).filter(Boolean);
+  const anchor = steps.find((s) => !s.completed) || steps[steps.length - 1];
+  let checkpoint = '';
+  if (anchor && anchor.milestone && Array.isArray(task?.milestones)) {
+    const meta = task.milestones.find((m) => m.title === anchor.milestone);
+    if (meta && meta.deliverable) checkpoint = meta.deliverable;
+  }
+
+  const allDone = done === items.length;
+  checkpointEl.hidden = false;
+  checkpointEl.innerHTML = allDone
+    ? `<span class="today-checkpoint__icon" aria-hidden="true">🎉</span>` +
+      `<span><strong>本日任务全部完成！</strong><em class="today-checkpoint__progress">${done}/${items.length}</em></span>`
+    : `<span class="today-checkpoint__icon" aria-hidden="true">🎯</span>` +
+      `<span>本日检查点：<strong>${escapeHtml(checkpoint || '完成今天安排的任务')}</strong><em class="today-checkpoint__progress">${done}/${items.length}</em></span>`;
 }
 
 function isTodayView() {
@@ -142,9 +212,14 @@ function scrollToNow() {
 function scheduleSig() {
   const date = store.getState().currentDate;
   const items = store.getScheduleByDate(date);
-  // 纳入 completed，完成态切换时才能触发重渲染
-  return date + '|' + items
-    .map((i) => `${i.id}:${i.startTime}:${i.endTime}:${i.completed ? 1 : 0}`)
+  // 纳入 completed / 步骤标题 / 里程碑 / 资源，完成态切换、标题编辑、
+  // 阶段筛选切换、资源增删时都能触发重渲染
+  return date + '|' + (filterMilestone || '') + '|' + items
+    .map((i) => {
+      const s = store.getStep(i.stepId);
+      const res = s && s.resource && s.resource.name ? `${s.resource.type}:${s.resource.name}` : '';
+      return `${i.id}:${i.startTime}:${i.endTime}:${i.completed ? 1 : 0}:${s?.completed ? 1 : 0}:${s?.title || ''}:${s?.milestone || ''}:${res}`;
+    })
     .join(',');
 }
 
@@ -155,6 +230,7 @@ function onStoreChange() {
     scrollToNow();
     updateNowLine(); // 日期切换后立即刷新红线显隐（仅今天显示）
   }
+  renderCheckpoint(); // 检查点条轻量，每次状态变化都刷新
   const sig = scheduleSig();
   if (sig === lastSig) return;
   lastSig = sig;
@@ -188,15 +264,18 @@ export function initCalendar() {
       `<div class="timeline__grid" id="timelineGrid"></div>` +
       `<div class="timeline__blocks" id="timelineBlocks"></div>` +
       `<div class="now-line" id="nowLine"></div>` +
-    `</div>`;
+    `</div>` +
+    `<div class="today-checkpoint" id="todayCheckpoint" hidden></div>`;
 
   timelineEl = document.getElementById('timeline');
   gridEl = document.getElementById('timelineGrid');
   blocksEl = document.getElementById('timelineBlocks');
   nowLineEl = document.getElementById('nowLine');
+  checkpointEl = document.getElementById('todayCheckpoint');
 
   renderGrid();
   renderBlocks();
+  renderCheckpoint();
   updateNowLine();
   scrollToNow();
   lastSig = scheduleSig();
@@ -240,4 +319,11 @@ export function initCalendar() {
 
   // 左栏步骤卡选中 -> 高亮日历对应块（Step 6）
   document.addEventListener('step:select', onStepSelect);
+
+  // 左栏阶段头筛选 -> 非该里程碑的时间块暗淡显示
+  document.addEventListener('milestone:filter', (e) => {
+    filterMilestone = (e.detail && e.detail.milestone) || null;
+    lastSig = ''; // 强制重渲染（sig 含筛选条件，此处兜底）
+    renderBlocks();
+  });
 }

@@ -21,25 +21,40 @@ function buildPayload(store) {
 
   return {
     app: '计划分解器',
-    schemaVersion: 1,
+    schemaVersion: 2,
     exportedAt: new Date().toISOString(),
     plan: {
       title: task.title,
       description: task.description || '',
       createdAt: task.createdAt,
+      dailyCapacity: task.dailyCapacity || '',
+      milestones: (task.milestones || []).map((m) => ({
+        title: m.title,
+        dayRange: m.dayRange || '',
+        deliverable: m.deliverable || '',
+      })),
       steps: task.steps
         .slice()
         .sort((a, b) => a.order - b.order)
         .map((s) => ({
           title: s.title,
-          standard: s.standard || '',
+          milestone: s.milestone || null,
+          day: s.day ?? null,
           estimatedMinutes: s.estimatedMinutes,
           completed: !!s.completed,
           order: s.order,
-          subtasks: (s.subtasks || []).map((st) => ({
+          resource: s.resource
+            ? { name: s.resource.name, url: s.resource.url, type: s.resource.type }
+            : null,
+          steps: (s.subtasks || []).map((st) => ({
             title: st.title,
             completed: !!st.completed,
           })),
+          checklist: (s.checklist || []).map((st) => ({
+            title: st.title,
+            completed: !!st.completed,
+          })),
+          output: s.output || s.standard || '',
         })),
       schedule: schedule.map((s) => ({
         date: s.date,
