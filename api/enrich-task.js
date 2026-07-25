@@ -31,6 +31,42 @@ function readBody(req) {
 
 const RESOURCE_TYPES = new Set(['article', 'video', 'practice', 'other']);
 
+/** 带指数退避重试的 fetch，遇到限流码自动等 1-2s 再试（最多 2 次） */
+async function fetchWithRetry(url, options, maxRetries = 2) {
+  let lastErr = null;
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok) return res;
+      const text = await res.text();
+      const isRateLimited =
+        res.status === 429 ||
+        res.status === 503 ||
+        (text && (text.includes('50609') || text.includes('rate limiting') || text.includes('too busy')));
+      if (isRateLimited && i < maxRetries) {
+        const delay = 1000 + Math.random() * 1000; // 1-2s 随机退避
+        console.log(`[enrich-task] rate limited (attempt ${i + 1}), retry in ${Math.round(delay)}ms`);
+        await new Promise((r) => setTimeout(r, delay));
+        continue;
+      }
+      const err = new Error(`HTTP ${res.status}`);
+      err.status = res.status;
+      err.body = text;
+      throw err;
+    } catch (e) {
+      lastErr = e;
+      if (i < maxRetries && (e.name === 'AbortError' || e.code === 'ECONNRESET')) {
+        const delay = 1000 + Math.random() * 1000;
+        console.log(`[enrich-task] network error (attempt ${i + 1}), retry in ${Math.round(delay)}ms`);
+        await new Promise((r) => setTimeout(r, delay));
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw lastErr || new Error('fetchWithRetry exhausted');
+}
+
 function sanitize(data) {
   const res = data && typeof data.resource === 'object' && data.resource ? data.resource : {};
   const resType = RESOURCE_TYPES.has(res.type) ? res.type : 'article';
@@ -84,7 +120,7 @@ module.exports = async (req, res) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 14000);
 
-    const upstream = await fetch(`${base}/chat/completions`, {
+    const upstream = await fetchWithRetry(`${base}/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({

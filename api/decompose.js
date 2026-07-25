@@ -105,6 +105,44 @@ function sanitizeQuestions(qs) {
   return qs.slice(0, 3).map((q) => String(q || '').slice(0, 120)).filter((q) => q.trim());
 }
 
+/** 带指数退避重试的 fetch，遇到限流码自动等 2-4s 再试（最多 2 次） */
+async function fetchWithRetry(url, options, maxRetries = 2) {
+  let lastErr = null;
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok) return res;
+      const text = await res.text();
+      // 限流 / 服务器忙 → 重试
+      const isRateLimited =
+        res.status === 429 ||
+        res.status === 503 ||
+        (text && (text.includes('50609') || text.includes('rate limiting') || text.includes('too busy')));
+      if (isRateLimited && i < maxRetries) {
+        const delay = 2000 + Math.random() * 2000; // 2-4s 随机退避
+        console.log(`[decompose] rate limited (attempt ${i + 1}), retry in ${Math.round(delay)}ms`);
+        await new Promise((r) => setTimeout(r, delay));
+        continue;
+      }
+      // 非限流错误直接抛
+      const err = new Error(`HTTP ${res.status}`);
+      err.status = res.status;
+      err.body = text;
+      throw err;
+    } catch (e) {
+      lastErr = e;
+      if (i < maxRetries && (e.name === 'AbortError' || e.code === 'ECONNRESET')) {
+        const delay = 2000 + Math.random() * 2000;
+        console.log(`[decompose] network error (attempt ${i + 1}), retry in ${Math.round(delay)}ms`);
+        await new Promise((r) => setTimeout(r, delay));
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw lastErr || new Error('fetchWithRetry exhausted');
+}
+
 module.exports = async (req, res) => {
   // 允许跨域（同源一般不必，但便于本地调试）
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -164,7 +202,7 @@ module.exports = async (req, res) => {
     const timeout = setTimeout(() => controller.abort(), 58000);
 
     console.log(`[decompose] model=${model} base=${base} descLen=${description.length}`);
-    const upstream = await fetch(`${base}/chat/completions`, {
+    const upstream = await fetchWithRetry(`${base}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
