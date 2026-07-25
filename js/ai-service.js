@@ -263,8 +263,12 @@ export async function decomposeTask(description, variant = 0, opts = {}) {
       // 502 + 上游错误：这是「AI 服务商侧」的问题（Key 无效 / 模型名错 / 余额不足 / 超时）
       // 不再静默回退 Mock，而是把真实原因抛出去，让界面显示给用户看
       if (info && (info.error === 'UPSTREAM_ERROR' || info.error === 'DECOMPOSE_FAILED' || info.error === 'EMPTY_STEPS')) {
-        const reason =
+        let reason =
           info.detail || info.message || `AI 接口返回 ${res.status}`;
+        // 限流错误翻译成友好提示
+        if (/50609|rate.limit|too.busy|系统太忙|限流/i.test(String(reason))) {
+          reason = 'AI 服务器正忙，请稍等几秒后重试';
+        }
         const err = new Error(`AI 调用失败：${reason}`);
         err.isUpstream = true;
         err.reason = reason;
