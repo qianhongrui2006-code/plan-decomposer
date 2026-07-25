@@ -130,6 +130,11 @@
   padding: 4px 10px;
   font-weight: var(--font-weight-bold);
   letter-spacing: 1px;
+  outline: none;
+}
+.plan-tab--more:focus-visible {
+  outline: 2px solid var(--color-primary-400);
+  outline-offset: 1px;
 }
 .plan-tab--more:hover { box-shadow: var(--shadow-sm); }
 
@@ -138,6 +143,7 @@
   position: relative;
   display: inline-block;
   flex-shrink: 0;
+  isolation: isolate; /* 防止子元素 z-index 影响父容器布局 */
 }
 
 /* 下拉菜单列表（雾蓝粉卡通风格） */
