@@ -1,25 +1,15 @@
 // detail-panel.js — 右侧任务详情面板（Step 6）
-<<<<<<< HEAD
 // 监听 step:select（左侧步骤卡）/ timeblock:select（日历时间块）渲染选中步骤的详情。
 // 结构（按优化意见）：时间安排 + 📎学习资源 + 🪜执行步骤 + ✅验收清单 + 📤产出物；
 // 标题与各字段行内即时自动保存；完成勾选与日历双向同步；删除步骤本身（二次确认）。
 import { store } from './store.js';
 import { timeToMinutes, minutesToTime, durationMinutes } from './utils.js';
 import { enrichTaskStep } from './ai-service.js';
-=======
-// 监听 step:select（左侧步骤卡）/ timeblock:select（日历时间块）渲染选中步骤的详情；
-// 标题与描述行内即时自动保存；完成勾选与日历双向同步；删除步骤本身（二次确认）。
-import { store } from './store.js';
-import { timeToMinutes, minutesToTime, durationMinutes } from './utils.js';
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 
 let bodyEl; // #detailPanelBody
 let selectedStepId = null;
 let isEditing = false; // 正在编辑文本字段，抑制自身重渲染以保护输入焦点
-<<<<<<< HEAD
 let enrichLoading = false; // 正在 AI 补充详情，显示 loading
-=======
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 
 /* ---------------- 初始化 ---------------- */
 export function initDetailPanel() {
@@ -31,6 +21,13 @@ export function initDetailPanel() {
   document.addEventListener('timeblock:select', onSelect);
   // 外部变化（日历勾选完成、左栏删除步骤、拖拽排期等）同步刷新面板
   store.subscribe(onStoreChange);
+  // 计划切换时清空选中状态
+  document.addEventListener('plan:switch', () => {
+    selectedStepId = null;
+    isEditing = false;
+    enrichLoading = false;
+    renderEmpty();
+  });
 
   renderEmpty();
 }
@@ -62,7 +59,7 @@ function render() {
     renderEmpty();
     return;
   }
-  const task = store.getTask(step.taskId);
+  const plan = store.getPlan(step.taskId);
   const date = store.getState().currentDate;
   const sched = store.getScheduleForStepOnDate(step.id, date);
   const done = !!step.completed;
@@ -83,7 +80,6 @@ function render() {
         ? ''
         : '<button class="btn btn--ghost btn--block detail__arrange" type="button">＋ 安排到今天</button>');
 
-<<<<<<< HEAD
   // 📎 学习资源：类型 + 名称 + 链接/关键词（均可编辑；链接为 http 时给「打开」入口）
   const res = step.resource || {};
   const resType = res.type || 'article';
@@ -165,42 +161,6 @@ function render() {
     ? `<span class="detail__milestone" title="所属阶段">🏁 ${escapeHtml(step.milestone)}</span>`
     : '';
 
-=======
-  // 子任务（AI 分解生成，或用户手动添加）；含完成态与进度统计
-  const subs = Array.isArray(step.subtasks) ? step.subtasks : [];
-  const doneCount = subs.filter((s) => s.completed).length;
-  const subtaskSection = `
-    <section class="detail__section detail__subtasks">
-      <div class="detail__subtasks-head">
-        <h3 class="detail__label">子任务</h3>
-        ${subs.length ? `<span class="detail__subtasks-progress">${doneCount}/${subs.length}</span>` : ''}
-      </div>
-      ${
-        subs.length
-          ? `<ul class="subtasks">
-              ${subs
-                .map(
-                  (s) =>
-                    `<li class="subtask${s.completed ? ' is-done' : ''}">
-                      <label class="subtask__row">
-                        <input type="checkbox" data-act="toggle-sub" data-sub="${s.id}" ${s.completed ? 'checked' : ''} ${disabled} />
-                        <span class="subtask__title">${escapeHtml(s.title)}</span>
-                      </label>
-                      <button class="subtask__del" type="button" data-act="del-sub" data-sub="${s.id}" aria-label="删除子任务" ${disabled}>✕</button>
-                    </li>`
-                )
-                .join('')}
-            </ul>`
-          : `<p class="detail__hint">暂无子任务。可手动添加，或重新 AI 分解以生成子任务提示。</p>`
-      }
-      <div class="detail__subtasks-add">
-        <input class="form-input detail__subtask-input" type="text"
-          placeholder="添加子任务…" aria-label="添加子任务" ${disabled} />
-        <button class="btn btn--ghost detail__subtask-add" type="button" ${disabled}>＋ 添加</button>
-      </div>
-    </section>`;
-
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   bodyEl.innerHTML = `
     <div class="detail">
       <div class="detail__head">
@@ -209,11 +169,8 @@ function render() {
           aria-label="步骤标题" ${disabled} />
         <div class="detail__meta">
           <span class="step-card__status status--${status}">${statusText}</span>
-<<<<<<< HEAD
           ${msChip}
-=======
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
-          <span class="detail__parent" title="所属计划">${escapeHtml(task ? task.title : '—')}</span>
+          <span class="detail__parent" title="所属计划">${escapeHtml(plan ? plan.title : '—')}</span>
         </div>
       </div>
 
@@ -222,21 +179,11 @@ function render() {
         ${timeSection}
       </section>
 
-<<<<<<< HEAD
       ${resourceSection}
       ${enrichBanner}
       ${stepsSection}
       ${checkSection}
       ${outputSection}
-=======
-      <section class="detail__section">
-        <h3 class="detail__label">执行标准 / 描述</h3>
-        <textarea class="form-textarea detail__desc"
-          placeholder="填写这一步的执行标准或备注…" aria-label="执行标准或描述" ${disabled}>${escapeHtml(step.standard || '')}</textarea>
-      </section>
-
-      ${subtaskSection}
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 
       <section class="detail__section detail__footer">
         <label class="detail__check">
@@ -248,7 +195,6 @@ function render() {
     </div>`;
 
   bindEvents(step, sched);
-<<<<<<< HEAD
 
   // 自动补充详情：检测到富字段全空时，异步调用 AI 补充
   if (needsEnrich && !enrichLoading) {
@@ -289,23 +235,16 @@ function checklistSectionHTML({ items, doneCount, label, field, toggleAct, delAc
         <button class="btn btn--ghost detail__list-add" type="button" ${disabled}>＋ 添加</button>
       </div>
     </section>`;
-=======
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 }
 
 /* ---------------- 事件绑定 ---------------- */
 function bindEvents(step, sched) {
   const titleInput = bodyEl.querySelector('.detail__title');
-<<<<<<< HEAD
-=======
-  const descInput = bodyEl.querySelector('.detail__desc');
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   const check = bodyEl.querySelector('[data-act="toggle-done"]');
   const arrangeBtn = bodyEl.querySelector('.detail__arrange');
   const delBtn = bodyEl.querySelector('.detail__delete');
 
   // 标题：聚焦期间抑制自身重渲染，输入即写回 store（即时自动保存）
-<<<<<<< HEAD
   bindAutoSaveText(titleInput, () => {
     store.updateStep(step.id, { title: titleInput.value });
   });
@@ -370,52 +309,6 @@ function bindEvents(step, sched) {
   });
   autoResize(outputEl);
 
-=======
-  if (titleInput) {
-    titleInput.addEventListener('focus', () => { isEditing = true; });
-    titleInput.addEventListener('blur', onEditBlur);
-    titleInput.addEventListener('input', () => {
-      store.updateStep(step.id, { title: titleInput.value });
-    });
-  }
-  // 描述：同上；并随内容自动撑高（生成多少文字就有多大）
-  if (descInput) {
-    descInput.addEventListener('focus', () => { isEditing = true; });
-    descInput.addEventListener('blur', onEditBlur);
-    descInput.addEventListener('input', () => {
-      store.updateStep(step.id, { standard: descInput.value });
-      autoResize(descInput); // 边输入边撑高
-    });
-    autoResize(descInput);
-  }
-  // 子任务：勾选切换完成态（打勾效果）、删除、手动添加
-  bodyEl.querySelectorAll('[data-act="toggle-sub"]').forEach((cb) => {
-    cb.addEventListener('change', () => {
-      store.toggleSubtask(step.id, cb.dataset.sub);
-    });
-  });
-  bodyEl.querySelectorAll('[data-act="del-sub"]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      store.deleteSubtask(step.id, btn.dataset.sub);
-    });
-  });
-  const subtaskInput = bodyEl.querySelector('.detail__subtask-input');
-  const addSub = () => {
-    if (!subtaskInput) return;
-    const v = subtaskInput.value.trim();
-    if (!v) return;
-    store.addSubtask(step.id, v); // 写入后由 onStoreChange 重渲染，输入框自动清空
-  };
-  if (subtaskInput) {
-    bodyEl.querySelector('.detail__subtask-add')?.addEventListener('click', addSub);
-    subtaskInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        addSub();
-      }
-    });
-  }
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   // 完成勾选：与日历双向同步
   if (check) {
     check.addEventListener('change', () => {
@@ -446,11 +339,10 @@ function bindEvents(step, sched) {
   }
 }
 
-<<<<<<< HEAD
 /** 自动补充详情：检测到富字段全空时异步调用 AI，完成后自动刷新面板 */
 async function autoEnrich(step) {
-  const task = store.getTask(step.taskId);
-  const ctx = [task && task.title, step.milestone].filter(Boolean).join(' / ');
+  const plan = store.getPlan(step.taskId);
+  const ctx = [plan && plan.title, step.milestone].filter(Boolean).join(' / ');
   const data = await enrichTaskStep(step.title, ctx);
   if (data) {
     store.updateStepEnrichment(step.id, {
@@ -473,8 +365,6 @@ function bindAutoSaveText(el, onInput) {
   el.addEventListener('input', onInput);
 }
 
-=======
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 /** 编辑失焦：解除抑制并重渲染，使只读区（状态/时间）同步最新值 */
 function onEditBlur() {
   isEditing = false;
@@ -485,7 +375,9 @@ function onEditBlur() {
 /** 为未排期步骤寻找当天首个 5 分钟网格空闲时段（默认从 08:00 起，允许重叠则退回 08:00） */
 function findFreeSlot(date, dur) {
   const start = 8 * 60;
-  const items = store.getScheduleByDate(date);
+  const activePlan = store.getActivePlan();
+  const planStepIds = activePlan ? new Set(activePlan.steps.map((s) => s.id)) : new Set();
+  const items = store.getScheduleByDate(date).filter((s) => planStepIds.has(s.stepId));
   const busy = items
     .map((i) => ({ s: timeToMinutes(i.startTime), e: timeToMinutes(i.endTime) }))
     .sort((a, b) => a.s - b.s);

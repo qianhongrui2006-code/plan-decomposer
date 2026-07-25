@@ -19,24 +19,17 @@ import {
 const DAY_START = 0;
 const DAY_END = 24;
 
-<<<<<<< HEAD
 let bodyEl, timelineEl, gridEl, blocksEl, nowLineEl, checkpointEl;
-=======
-let bodyEl, timelineEl, gridEl, blocksEl, nowLineEl;
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 let nowTimer = null;
 let lastSig = '';
 let lastDate = '';
 let selectedStepId = null; // 当前选中的步骤（来自左栏卡片或时间块点击），用于高亮对应时间块
-<<<<<<< HEAD
 let filterMilestone = null; // 左栏阶段头点击筛选：非该里程碑的时间块暗淡显示
 
 /** 资源类型 → 中文标签 */
 function resTypeLabel(type) {
   return { article: '文章', video: '视频', practice: '实践' }[type] || '资源';
 }
-=======
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 
 /** 读取令牌中的每小时像素高度，JS 与 CSS 共用同一基准 */
 function hourHeightPx() {
@@ -81,23 +74,16 @@ function renderBlocks() {
   ) || 8;
   // 极短任务的微小兜底高度，避免高度为 0/负值（不改变时间对应）
   const MIN_SLOT = 4;
-<<<<<<< HEAD
   // 布局按「内层卡片高度 = 外层时间槽高度 − 间隔」判定：
   // - cardH < 18px：极短块，只显示时间（标题进 aria-label）
   // - ≥ 18px：统一单行显示「标题 + 时间」，标题省略、时间固定右侧，避免标题/时间黏连或换行
   // - ≥ 44px 且有资源：追加第二行「资源胶囊」（类型 + 资源名）
   const MICRO_PX = 18;
   const RICH_PX = 44;
-=======
-  // 布局按「内层卡片高度 = 外层时间槽高度 − 间隔」判定，避免扣掉 gap 后误判：
-  // - cardH < 18px：极短块，只显示时间（标题进 aria-label）
-  // - 18 ≤ cardH < 44px：短块，标题与时间同一行（横向）
-  // - ≥ 44px：常规两行（标题 + 时间）
-  const MICRO_PX = 18;
-  const SHORT_PX = 44;
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   const date = store.getState().currentDate;
-  const items = store.getScheduleByDate(date);
+  const activePlan = store.getActivePlan();
+  const planStepIds = activePlan ? new Set(activePlan.steps.map((s) => s.id)) : new Set();
+  const items = store.getScheduleByDate(date).filter((s) => planStepIds.has(s.stepId));
   // 时间精确渲染：外层 .time-block 占满真实时间槽（top/height 与时刻一一对应）；
   // 内层 .time-block__card 使用 margin:gap/2 0 形成与相邻块的物理间隔。
   // 任务时间数据完全不变，间隔纯展示层留白。
@@ -108,7 +94,6 @@ function renderBlocks() {
     const height = Math.max(dur * pxPerMin, MIN_SLOT);
     const cardH = Math.max(height - gap, 2);
     const isMicro = cardH < MICRO_PX;
-<<<<<<< HEAD
     const step = store.getStep(it.stepId);
     const done = !!step?.completed;
     const res = step && step.resource && step.resource.name ? step.resource : null;
@@ -121,15 +106,6 @@ function renderBlocks() {
       (isMicro ? ' is-micro' : '') +
       (it.stepId === selectedStepId ? ' is-selected' : '') +
       (dimmed ? ' is-dimmed' : '');
-=======
-    const isShort = cardH < SHORT_PX && !isMicro;
-    const done = !!store.getStep(it.stepId)?.completed;
-    const cls = 'time-block' +
-      (done ? ' is-done' : '') +
-      (isMicro ? ' is-micro' : '') +
-      (isShort ? ' is-short' : '') +
-      (it.stepId === selectedStepId ? ' is-selected' : '');
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
     const draggable = done ? 'false' : 'true';
     const check = done
       ? '<label class="time-block__check" title="标记完成">' +
@@ -138,7 +114,6 @@ function renderBlocks() {
         '<input type="checkbox" data-act="toggle-done" /></label>';
     const title = escapeHtml(stepTitle(it.stepId));
     const time = `${it.startTime}–${it.endTime}`;
-<<<<<<< HEAD
     let body;
     if (isMicro) {
       body = `<div class="time-block__time">${time}</div>`;
@@ -154,22 +129,12 @@ function renderBlocks() {
         `<div class="time-block__title">${title}</div>` +
         `<div class="time-block__time">${time}</div>`;
     }
-=======
-    const body = isMicro
-      ? `<div class="time-block__time">${time}</div>`
-      : `<div class="time-block__title">${title}</div>` +
-        `<div class="time-block__time">${time}</div>`;
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
     return (
       `<div class="${cls}" data-id="${it.id}" data-step="${it.stepId}" ` +
       `draggable="${draggable}" ` +
       `style="top:${top}px;height:${height}px" tabindex="0" role="button" ` +
       `aria-label="${title} ${time}">` +
-<<<<<<< HEAD
         `<div class="time-block__card${showRes ? ' is-rich' : ''}">` +
-=======
-        `<div class="time-block__card">` +
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
           check +
           body +
         `</div>` +
@@ -178,14 +143,14 @@ function renderBlocks() {
   }).join('');
 }
 
-<<<<<<< HEAD
 /** 底部「本日检查点」条：今日任务进度 + 当前里程碑交付物（sticky 吸附日历底部） */
 function renderCheckpoint() {
   if (!checkpointEl) return;
   const date = store.getState().currentDate;
-  const items = store.getScheduleByDate(date);
-  const task = store.getState().tasks[0];
-  const hasPlan = !!(task && task.steps && task.steps.length);
+  const activePlan = store.getActivePlan();
+  const planStepIds = activePlan ? new Set(activePlan.steps.map((s) => s.id)) : new Set();
+  const items = store.getScheduleByDate(date).filter((s) => planStepIds.has(s.stepId));
+  const hasPlan = !!(activePlan && activePlan.steps && activePlan.steps.length);
 
   // 无排程：仅「今天 + 已有计划」时给引导，其余情况隐藏
   if (!items.length) {
@@ -209,8 +174,8 @@ function renderCheckpoint() {
   const steps = items.map((it) => store.getStep(it.stepId)).filter(Boolean);
   const anchor = steps.find((s) => !s.completed) || steps[steps.length - 1];
   let checkpoint = '';
-  if (anchor && anchor.milestone && Array.isArray(task?.milestones)) {
-    const meta = task.milestones.find((m) => m.title === anchor.milestone);
+  if (anchor && anchor.milestone && Array.isArray(activePlan?.milestones)) {
+    const meta = activePlan.milestones.find((m) => m.title === anchor.milestone);
     if (meta && meta.deliverable) checkpoint = meta.deliverable;
   }
 
@@ -223,8 +188,6 @@ function renderCheckpoint() {
       `<span>本日检查点：<strong>${escapeHtml(checkpoint || '完成今天安排的任务')}</strong><em class="today-checkpoint__progress">${done}/${items.length}</em></span>`;
 }
 
-=======
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 function isTodayView() {
   return store.getState().currentDate === todayStr();
 }
@@ -252,20 +215,14 @@ function scrollToNow() {
 function scheduleSig() {
   const date = store.getState().currentDate;
   const items = store.getScheduleByDate(date);
-<<<<<<< HEAD
-  // 纳入 completed / 步骤标题 / 里程碑 / 资源，完成态切换、标题编辑、
-  // 阶段筛选切换、资源增删时都能触发重渲染
-  return date + '|' + (filterMilestone || '') + '|' + items
+  const activePlanId = store.getState().activePlanId || '';
+  // 纳入 completed / 步骤标题 / 里程碑 / 资源 / activePlanId，切换计划时触发重渲染
+  return date + '|' + activePlanId + '|' + (filterMilestone || '') + '|' + items
     .map((i) => {
       const s = store.getStep(i.stepId);
       const res = s && s.resource && s.resource.name ? `${s.resource.type}:${s.resource.name}` : '';
       return `${i.id}:${i.startTime}:${i.endTime}:${i.completed ? 1 : 0}:${s?.completed ? 1 : 0}:${s?.title || ''}:${s?.milestone || ''}:${res}`;
     })
-=======
-  // 纳入 completed，完成态切换时才能触发重渲染
-  return date + '|' + items
-    .map((i) => `${i.id}:${i.startTime}:${i.endTime}:${i.completed ? 1 : 0}`)
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
     .join(',');
 }
 
@@ -276,10 +233,7 @@ function onStoreChange() {
     scrollToNow();
     updateNowLine(); // 日期切换后立即刷新红线显隐（仅今天显示）
   }
-<<<<<<< HEAD
   renderCheckpoint(); // 检查点条轻量，每次状态变化都刷新
-=======
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   const sig = scheduleSig();
   if (sig === lastSig) return;
   lastSig = sig;
@@ -313,28 +267,18 @@ export function initCalendar() {
       `<div class="timeline__grid" id="timelineGrid"></div>` +
       `<div class="timeline__blocks" id="timelineBlocks"></div>` +
       `<div class="now-line" id="nowLine"></div>` +
-<<<<<<< HEAD
     `</div>` +
     `<div class="today-checkpoint" id="todayCheckpoint" hidden></div>`;
-=======
-    `</div>`;
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 
   timelineEl = document.getElementById('timeline');
   gridEl = document.getElementById('timelineGrid');
   blocksEl = document.getElementById('timelineBlocks');
   nowLineEl = document.getElementById('nowLine');
-<<<<<<< HEAD
   checkpointEl = document.getElementById('todayCheckpoint');
 
   renderGrid();
   renderBlocks();
   renderCheckpoint();
-=======
-
-  renderGrid();
-  renderBlocks();
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   updateNowLine();
   scrollToNow();
   lastSig = scheduleSig();
@@ -378,7 +322,6 @@ export function initCalendar() {
 
   // 左栏步骤卡选中 -> 高亮日历对应块（Step 6）
   document.addEventListener('step:select', onStepSelect);
-<<<<<<< HEAD
 
   // 左栏阶段头筛选 -> 非该里程碑的时间块暗淡显示
   document.addEventListener('milestone:filter', (e) => {
@@ -386,6 +329,12 @@ export function initCalendar() {
     lastSig = ''; // 强制重渲染（sig 含筛选条件，此处兜底）
     renderBlocks();
   });
-=======
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
+
+  // 计划切换时刷新日历
+  document.addEventListener('plan:switch', () => {
+    filterMilestone = null;
+    lastSig = '';
+    lastDate = '';
+    renderBlocks();
+  });
 }

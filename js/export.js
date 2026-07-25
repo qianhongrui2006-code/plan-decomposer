@@ -3,11 +3,11 @@
 // 含步骤、手动编辑后的标题/描述/子任务、完成态与排期。不包含面板布局配置。
 import { timeToMinutes, minutesToTime } from './utils.js';
 
-/** 取当前计划（单计划模型：tasks[0]），无计划返回 null */
+/** 取当前激活计划，无计划返回 null */
 function getCurrentPlan(store) {
-  const task = store.getState().tasks[0];
-  if (!task || task.steps.length === 0) return null;
-  return task;
+  const plan = store.getActivePlan();
+  if (!plan || !plan.steps || plan.steps.length === 0) return null;
+  return plan;
 }
 
 /** 构建导出数据对象（结构化、可读、含元信息） */
@@ -21,31 +21,23 @@ function buildPayload(store) {
 
   return {
     app: '计划分解器',
-<<<<<<< HEAD
     schemaVersion: 2,
-=======
-    schemaVersion: 1,
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
     exportedAt: new Date().toISOString(),
     plan: {
       title: task.title,
       description: task.description || '',
       createdAt: task.createdAt,
-<<<<<<< HEAD
       dailyCapacity: task.dailyCapacity || '',
       milestones: (task.milestones || []).map((m) => ({
         title: m.title,
         dayRange: m.dayRange || '',
         deliverable: m.deliverable || '',
       })),
-=======
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
       steps: task.steps
         .slice()
         .sort((a, b) => a.order - b.order)
         .map((s) => ({
           title: s.title,
-<<<<<<< HEAD
           milestone: s.milestone || null,
           day: s.day ?? null,
           estimatedMinutes: s.estimatedMinutes,
@@ -63,16 +55,6 @@ function buildPayload(store) {
             completed: !!st.completed,
           })),
           output: s.output || s.standard || '',
-=======
-          standard: s.standard || '',
-          estimatedMinutes: s.estimatedMinutes,
-          completed: !!s.completed,
-          order: s.order,
-          subtasks: (s.subtasks || []).map((st) => ({
-            title: st.title,
-            completed: !!st.completed,
-          })),
->>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
         })),
       schedule: schedule.map((s) => ({
         date: s.date,
