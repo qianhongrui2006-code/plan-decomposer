@@ -286,9 +286,13 @@ export async function decomposeTask(description, variant = 0, opts = {}) {
     }
     return { steps: data.steps, plan: data.plan || null, usedMock: false };
   } catch (e) {
-    if (e && e.isUpstream) throw e; // 上游错误：透传给调用方显示，不回退 Mock
-    // 未配置 AI_API_KEY、网络错误、解析失败等其他情况 → 回退本地模板，保证始终可用
-    return { ...mockDecompose(description, variant), plan: null, usedMock: true };
+    if (e && e.isUpstream) throw e;
+    // 任何其他错误也直接显示，不再静默回退 Mock，帮助定位问题
+    const reason = e && e.message ? e.message : '网络请求失败，请检查链接或稍后重试';
+    const err = new Error(`AI 调用失败：${reason}`);
+    err.isUpstream = true;
+    err.reason = reason;
+    throw err;
   }
 }
 
