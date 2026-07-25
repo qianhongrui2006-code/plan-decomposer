@@ -948,3 +948,334 @@
   color: var(--color-error);
   box-shadow: var(--shadow-sm);
 }
+
+/* ============================================================
+   里程碑分组（左栏阶段视图）
+   ============================================================ */
+.plan-capacity {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-border-strong);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+.plan-capacity strong {
+  color: var(--color-text);
+}
+
+.milestone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* 阶段头：可点击筛选（点击后日历只高亮该阶段） */
+.milestone__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-surface-3);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform var(--transition-fast),
+              box-shadow var(--transition-fast),
+              background-color var(--transition-fast),
+              border-color var(--transition-fast);
+}
+.milestone__head:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+.milestone__head.is-active {
+  background-color: var(--color-pink-soft);
+  border-color: var(--color-pink-strong);
+}
+.milestone__badge {
+  flex: 0 0 auto;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-400);
+  color: #fff;
+  border: 1px solid var(--color-text);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+.milestone__head.is-active .milestone__badge {
+  background-color: var(--color-pink-strong);
+}
+.milestone__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.milestone__days {
+  flex: 0 0 auto;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.milestone__count {
+  flex: 0 0 auto;
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+.milestone__deliverable {
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-normal);
+}
+
+/* 阶段进度条 */
+.milestone__bar {
+  height: 10px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-border-strong);
+  overflow: hidden;
+}
+.milestone__bar i {
+  display: block;
+  height: 100%;
+  background-color: var(--color-primary-400);
+  border-radius: inherit;
+  transition: width var(--transition-normal);
+}
+.milestone__head.is-active + .milestone__deliverable + .milestone__bar i,
+.milestone:has(.milestone__head.is-active) .milestone__bar i {
+  background-color: var(--color-pink);
+}
+
+/* 步骤卡：第几天胶囊 */
+.step-card__day {
+  display: inline-block;
+  flex: 0 0 auto;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-pink-soft);
+  border: 1px solid var(--color-pink-strong);
+  color: var(--color-pink-strong);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   AI 追问卡片（生成计划前的澄清问题）
+   ============================================================ */
+.clarify-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-pink-soft);
+  background-image: var(--linen-texture);
+  border: 2px solid var(--color-pink-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+.clarify-card__head {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-pink-strong);
+}
+.clarify-card__q {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.clarify-card__q-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  line-height: var(--line-height-normal);
+}
+.clarify-card__input {
+  background-color: #fff;
+}
+.clarify-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* ============================================================
+   时间块：资源胶囊（高块第二行）+ 阶段筛选暗淡
+   ============================================================ */
+.time-block__card.is-rich {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 2px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.time-block__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.time-block__res {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 10px;
+  line-height: 1.3;
+  color: var(--color-text-muted);
+}
+.time-block__res i {
+  font-style: normal;
+  flex: 0 0 auto;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-pink-soft);
+  color: var(--color-pink-strong);
+  border: 1px solid var(--color-pink-strong);
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+}
+.time-block__res span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* 阶段筛选：非该阶段的块暗淡（保留位置感，不隐藏） */
+.time-block.is-dimmed {
+  opacity: 0.28;
+}
+.time-block.is-dimmed .time-block__card {
+  box-shadow: none;
+}
+
+/* ============================================================
+   日历底部：本日检查点（sticky 吸附）
+   ============================================================ */
+.today-checkpoint {
+  position: sticky;
+  bottom: var(--space-2);
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) var(--space-2) 0;
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-pink-soft);
+  background-image: var(--linen-texture);
+  border: 2px solid var(--color-pink-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text);
+  line-height: var(--line-height-normal);
+}
+.today-checkpoint[hidden] {
+  display: none;
+}
+.today-checkpoint__icon {
+  flex: 0 0 auto;
+}
+.today-checkpoint strong {
+  color: var(--color-pink-strong);
+}
+.today-checkpoint__progress {
+  font-style: normal;
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+}
+
+/* ============================================================
+   右侧详情：学习资源 / 里程碑徽标 / 产出物
+   ============================================================ */
+.detail__milestone {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-pink-strong);
+  background-color: var(--color-pink-soft);
+  border: 1px solid var(--color-pink-strong);
+  border-radius: var(--radius-full);
+  padding: 2px var(--space-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.detail__res-row {
+  display: flex;
+  gap: var(--space-2);
+}
+.detail__res-type {
+  flex: 0 0 auto;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: #fff;
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.detail__res-type:focus {
+  outline: none;
+  border-color: var(--color-primary-400);
+  box-shadow: 3px 3px 0 var(--color-primary-200);
+}
+.detail__res-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.detail__res-link {
+  align-self: flex-start;
+  display: inline-block;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-100);
+  border: 1px solid var(--color-text);
+  color: var(--color-primary-600);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+.detail__res-link:hover {
+  background-color: var(--color-primary-200);
+  transform: translate(-1px, -1px);
+}
+.detail__res-type:disabled,
+.detail__res-name:disabled,
+.detail__res-url:disabled {
+  opacity: 0.75;
+  background-color: var(--color-surface-2);
+  cursor: not-allowed;
+}
+.detail__output {
+  min-height: calc(1.6em + var(--space-4));
+  resize: none;
+  overflow: hidden;
+  line-height: 1.6;
+  font-family: inherit;
+}
+.detail__output:disabled {
+  opacity: 0.75;
+  background-color: var(--color-surface-2);
+  cursor: not-allowed;
+}
