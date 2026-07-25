@@ -45,11 +45,9 @@ function startMinFromClientY(clientY) {
  */
 function smartAdjacentSnap(min) {
   const date = store.getState().currentDate;
-  const activePlan = store.getActivePlan();
-  const planStepIds = activePlan ? new Set(activePlan.steps.map((s) => s.id)) : new Set();
   let best = min;
   let bestDelta = ADJACENT_SNAP;
-  for (const it of store.getScheduleByDate(date).filter((s) => planStepIds.has(s.stepId))) {
+  for (const it of store.getScheduleByDate(date)) {
     const endMin = timeToMinutes(it.endTime);
     const d = Math.abs(min - endMin);
     if (d < bestDelta) {

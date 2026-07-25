@@ -81,9 +81,7 @@ function renderBlocks() {
   const MICRO_PX = 18;
   const RICH_PX = 44;
   const date = store.getState().currentDate;
-  const activePlan = store.getActivePlan();
-  const planStepIds = activePlan ? new Set(activePlan.steps.map((s) => s.id)) : new Set();
-  const items = store.getScheduleByDate(date).filter((s) => planStepIds.has(s.stepId));
+  const items = store.getScheduleByDate(date);
   // 时间精确渲染：外层 .time-block 占满真实时间槽（top/height 与时刻一一对应）；
   // 内层 .time-block__card 使用 margin:gap/2 0 形成与相邻块的物理间隔。
   // 任务时间数据完全不变，间隔纯展示层留白。
@@ -147,14 +145,12 @@ function renderBlocks() {
 function renderCheckpoint() {
   if (!checkpointEl) return;
   const date = store.getState().currentDate;
-  const activePlan = store.getActivePlan();
-  const planStepIds = activePlan ? new Set(activePlan.steps.map((s) => s.id)) : new Set();
-  const items = store.getScheduleByDate(date).filter((s) => planStepIds.has(s.stepId));
-  const hasPlan = !!(activePlan && activePlan.steps && activePlan.steps.length);
+  const items = store.getScheduleByDate(date);
+  const hasAnyPlan = store.getState().plans.some((p) => p.steps && p.steps.length > 0);
 
   // 无排程：仅「今天 + 已有计划」时给引导，其余情况隐藏
   if (!items.length) {
-    if (isTodayView() && hasPlan) {
+    if (isTodayView() && hasAnyPlan) {
       checkpointEl.hidden = false;
       checkpointEl.innerHTML =
         `<span class="today-checkpoint__icon" aria-hidden="true">🎯</span>` +
@@ -174,9 +170,12 @@ function renderCheckpoint() {
   const steps = items.map((it) => store.getStep(it.stepId)).filter(Boolean);
   const anchor = steps.find((s) => !s.completed) || steps[steps.length - 1];
   let checkpoint = '';
-  if (anchor && anchor.milestone && Array.isArray(activePlan?.milestones)) {
-    const meta = activePlan.milestones.find((m) => m.title === anchor.milestone);
-    if (meta && meta.deliverable) checkpoint = meta.deliverable;
+  if (anchor && anchor.milestone) {
+    const anchorPlan = store.getState().plans.find((p) => p.id === anchor.taskId);
+    if (anchorPlan && Array.isArray(anchorPlan.milestones)) {
+      const meta = anchorPlan.milestones.find((m) => m.title === anchor.milestone);
+      if (meta && meta.deliverable) checkpoint = meta.deliverable;
+    }
   }
 
   const allDone = done === items.length;

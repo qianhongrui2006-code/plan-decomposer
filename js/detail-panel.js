@@ -375,9 +375,7 @@ function onEditBlur() {
 /** 为未排期步骤寻找当天首个 5 分钟网格空闲时段（默认从 08:00 起，允许重叠则退回 08:00） */
 function findFreeSlot(date, dur) {
   const start = 8 * 60;
-  const activePlan = store.getActivePlan();
-  const planStepIds = activePlan ? new Set(activePlan.steps.map((s) => s.id)) : new Set();
-  const items = store.getScheduleByDate(date).filter((s) => planStepIds.has(s.stepId));
+  const items = store.getScheduleByDate(date);
   const busy = items
     .map((i) => ({ s: timeToMinutes(i.startTime), e: timeToMinutes(i.endTime) }))
     .sort((a, b) => a.s - b.s);
