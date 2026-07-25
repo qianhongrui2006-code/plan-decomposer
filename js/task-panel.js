@@ -47,6 +47,9 @@ async function onGenerate() {
   els.generateBtn.disabled = true;
   const label = els.generateBtn.textContent;
   els.generateBtn.textContent = 'AI 分解中…';
+  // 在列表区显示明显的加载提示，避免用户以为卡死了
+  els.stepList.innerHTML =
+    '<div class="loading-state"><span class="spinner"></span><p>AI 正在拆解计划，约需 30-60 秒…</p><p class="loading-state__sub">请耐心等待，完成后会自动刷新</p></div>';
 
   try {
     currentVariant = 0;

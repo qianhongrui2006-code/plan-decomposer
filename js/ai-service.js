@@ -245,15 +245,13 @@ export async function decomposeTask(description, variant = 0, opts = {}) {
   if (opts.skipClarify) payload.skipClarify = true;
 
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 59000);
+    // 不设前端超时：Vercel 函数本身已有 60s maxDuration，前端提前 abort 反而会导致
+    // 后端成功返回的结果被丢弃（用户看到 mock 但刷新后数据其实存在）。
     const res = await fetch('/api/decompose', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-      signal: ctrl.signal,
     });
-    clearTimeout(t);
     if (!res.ok) {
       // 尝试解析后端返回的结构化错误（含上游服务商真实报错）
       let info = null;
