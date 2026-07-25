@@ -214,13 +214,23 @@ function onListClick(e) {
       onRegenerate();
       return;
     }
-    // AI 追问卡片：提交 / 跳过
+    // AI 追问卡片：提交 / 跳过 / 点击候选答案 chip 填入输入框
     if (act === 'clarify-submit') {
       onClarifySubmit(false);
       return;
     }
     if (act === 'clarify-skip') {
       onClarifySubmit(true);
+      return;
+    }
+    if (act === 'clarify-opt') {
+      if (clarifyLoading) return;
+      const wrap = trigger.closest('.clarify-card__q');
+      const input = wrap && wrap.querySelector('.clarify-card__input');
+      if (input) {
+        input.value = trigger.dataset.opt || '';
+        input.focus();
+      }
       return;
     }
     // 阶段头：点击筛选该阶段的日程（再点取消）
@@ -410,18 +420,40 @@ function milestoneGroupHTML(g, gi, date) {
   </section>`;
 }
 
+/** 解析追问文本：尾部括号内的候选答案拆成可点击 chips（「问题（A / B / C）」） */
+function parseQuestion(q) {
+  const m = String(q).match(/^(.*?)[（(]([^（）()]+)[）)]\s*$/);
+  if (!m) return { text: String(q), options: [] };
+  const options = m[2]
+    .split(/[\/、，,]/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 4);
+  return { text: m[1].trim() || String(q), options };
+}
+
 /** AI 追问卡片 */
 function clarifyCardHTML() {
   const qs = pendingClarify.questions
-    .map(
-      (q, i) => `
+    .map((q, i) => {
+      const { text, options } = parseQuestion(q);
+      const chips = options.length
+        ? `<span class="clarify-card__options">${options
+            .map(
+              (o) =>
+                `<button type="button" class="clarify-card__chip" data-act="clarify-opt" data-opt="${escapeHtml(o)}" ${clarifyLoading ? 'disabled' : ''}>${escapeHtml(o)}</button>`
+            )
+            .join('')}</span>`
+        : '';
+      return `
       <label class="clarify-card__q">
-        <span class="clarify-card__q-text">${i + 1}. ${escapeHtml(q)}</span>
+        <span class="clarify-card__q-text">${i + 1}. ${escapeHtml(text)}</span>
+        ${chips}
         <input class="form-input clarify-card__input" type="text"
-          data-q="${escapeHtml(q)}" placeholder="简单回答即可，可留空"
+          data-q="${escapeHtml(text)}" placeholder="点击上方选项快速回答，或手动输入"
           ${clarifyLoading ? 'disabled' : ''} />
-      </label>`
-    )
+      </label>`;
+    })
     .join('');
   return `
   <div class="clarify-card">
