@@ -1,19 +1,28 @@
 // task-panel.js — 左侧 AI 任务分解面板
+<<<<<<< HEAD
 // 输入区、AI 分解（真实 AI + 追问澄清流程）、里程碑分组步骤卡（进度条 + 阶段筛选）、
 // 行内编辑标题、上移/下移、删除、底部重新生成全部
 import { store } from './store.js';
 import { decomposeTask, mockDecompose } from './ai-service.js';
+=======
+// Step 3：输入区、AI 分解（mock）、步骤卡渲染、行内编辑标题、上移/下移、删除、底部重新生成全部
+import { store } from './store.js';
+import { decomposeTask } from './ai-service.js';
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 import { formatDateShort } from './utils.js';
 
 let currentTaskId = null; // 当前正在编辑的计划（单计划模型）
 let currentVariant = 0; // 当前方案变体，供「重新生成全部」循环切换
 let editingStepId = null; // 正在行内编辑的步骤，避免订阅重渲染打断输入
 let cancelEdit = false; // Escape 取消编辑标记
+<<<<<<< HEAD
 let lastUsedMock = null; // 最近一次分解是否走本地示例模板（true=示例，false=真实 AI，null=尚未生成）
 let decomposeError = null; // 分解失败的临时提示文本
 let pendingClarify = null; // AI 追问待答：{ description, questions[] }（非 null 时优先渲染追问卡片）
 let clarifyLoading = false; // 追问提交中（防重复点击）
 let milestoneFilter = null; // 当前筛选的里程碑名（点击阶段头切换，null=全部）
+=======
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 
 const els = {};
 
@@ -25,9 +34,15 @@ export function initTaskPanel() {
   els.generateBtn.addEventListener('click', onGenerate);
   els.stepList.addEventListener('click', onListClick);
 
+<<<<<<< HEAD
   // 状态变化时重渲染（编辑中 / 追问提交中不重渲染，保护输入焦点与待答状态）
   store.subscribe(() => {
     if (editingStepId || clarifyLoading) return;
+=======
+  // 状态变化时重渲染（编辑中不重渲染，保护输入焦点）
+  store.subscribe(() => {
+    if (editingStepId) return;
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
     render();
   });
 
@@ -35,7 +50,11 @@ export function initTaskPanel() {
 }
 
 /* ---------------- 生成 ---------------- */
+<<<<<<< HEAD
 async function onGenerate() {
+=======
+function onGenerate() {
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   const desc = els.textarea.value.trim();
   if (!desc) {
     els.textarea.classList.add('is-invalid');
@@ -44,6 +63,7 @@ async function onGenerate() {
     return;
   }
 
+<<<<<<< HEAD
   els.generateBtn.disabled = true;
   const label = els.generateBtn.textContent;
   els.generateBtn.textContent = 'AI 分解中…';
@@ -153,6 +173,31 @@ async function onClarifySubmit(skip) {
 
 /* ---------------- 重新生成全部 ---------------- */
 async function onRegenerate() {
+=======
+  // 模拟异步思考（真实大模型 API 在 Step 8 接入，接口不变）
+  els.generateBtn.disabled = true;
+  const label = els.generateBtn.textContent;
+  els.generateBtn.textContent = 'AI 分解中…';
+
+  setTimeout(() => {
+    currentVariant = 0;
+    const { steps } = decomposeTask(desc, currentVariant);
+    const task = store.replaceCurrentTask({
+      title: desc,
+      description: desc,
+      steps,
+    });
+    currentTaskId = task.id;
+
+    els.generateBtn.disabled = false;
+    els.generateBtn.textContent = label;
+    els.textarea.value = ''; // 清空输入，方便下次规划
+  }, 450);
+}
+
+/* ---------------- 重新生成全部 ---------------- */
+function onRegenerate() {
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   const task = currentTaskId
     ? store.getTask(currentTaskId)
     : store.getState().tasks[0];
@@ -162,6 +207,7 @@ async function onRegenerate() {
   if (!ok) return;
 
   currentVariant += 1;
+<<<<<<< HEAD
   let res;
   try {
     // 重新生成固定跳过追问，直接要新方案
@@ -206,6 +252,15 @@ function setMilestoneFilter(ms) {
   document.dispatchEvent(
     new CustomEvent('milestone:filter', { detail: { milestone: ms } })
   );
+=======
+  const { steps } = decomposeTask(task.title || task.description, currentVariant);
+  const t = store.replaceCurrentTask({
+    title: task.title,
+    description: task.description,
+    steps,
+  });
+  currentTaskId = t.id;
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 }
 
 /* ---------------- 列表点击分发 ---------------- */
@@ -218,6 +273,7 @@ function onListClick(e) {
       onRegenerate();
       return;
     }
+<<<<<<< HEAD
     // AI 追问卡片：提交 / 跳过 / 点击候选答案 chip 填入输入框
     if (act === 'clarify-submit') {
       onClarifySubmit(false);
@@ -244,6 +300,8 @@ function onListClick(e) {
       render();
       return;
     }
+=======
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 
     const card = e.target.closest('.step-card');
     if (!card) return;
@@ -328,25 +386,32 @@ function startEditTitle(card, stepId) {
 
 /* ---------------- 渲染 ---------------- */
 function render() {
+<<<<<<< HEAD
   // AI 追问待答：优先渲染追问卡片（此时通常还没有步骤）
   if (pendingClarify) {
     els.stepList.innerHTML = errorBannerHTML() + clarifyCardHTML();
     return;
   }
 
+=======
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   const task = currentTaskId
     ? store.getTask(currentTaskId)
     : store.getState().tasks[0];
 
   if (!task || task.steps.length === 0) {
     els.stepList.innerHTML =
+<<<<<<< HEAD
       errorBannerHTML() +
+=======
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
       '<div class="empty-state"><p>输入计划并点击「AI 分解」生成细化步骤</p></div>';
     return;
   }
 
   currentTaskId = task.id;
   const sorted = [...task.steps].sort((a, b) => a.order - b.order);
+<<<<<<< HEAD
   const date = store.getState().currentDate;
   const groups = buildGroups(task, sorted);
 
@@ -363,12 +428,21 @@ function render() {
     !flat && task.dailyCapacity
       ? `<div class="plan-capacity">⏱ 建议每天投入 <strong>${escapeHtml(task.dailyCapacity)}</strong></div>`
       : '';
+=======
+  const total = sorted.length;
+  const date = store.getState().currentDate;
+
+  const cards = sorted
+    .map((s, i) => stepCardHTML(s, i, total, date))
+    .join('');
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 
   const regen = `
     <button class="btn btn--ghost btn--block step-regen" type="button" data-act="regen">
       ↻ 重新生成全部
     </button>`;
 
+<<<<<<< HEAD
   els.stepList.innerHTML = modeBannerHTML() + capacity + body + regen;
 }
 
@@ -503,6 +577,9 @@ function modeBannerHTML() {
     <span class="ai-mode-banner__dot" aria-hidden="true">●</span>
     <span class="ai-mode-banner__text">由 <strong>DeepSeek 实时生成</strong></span>
   </div>`;
+=======
+  els.stepList.innerHTML = cards + regen;
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
 }
 
 function stepCardHTML(s, i, total, date) {
@@ -529,11 +606,14 @@ function stepCardHTML(s, i, total, date) {
       <input type="checkbox" data-act="toggle-done" ${done ? 'checked' : ''} />
     </label>`;
 
+<<<<<<< HEAD
   // 计划第几天（AI 按天排布时给出）
   const dayChip = s.day
     ? `<span class="step-card__day">第 ${s.day} 天</span>`
     : '';
 
+=======
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
   // 排程信息：日期 + 起止时间（拖动到日历后即时显示）
   const schedLine = sched
     ? `<div class="step-card__time" title="安排在 ${escapeHtml(formatDateShort(sched.date))} ${sched.startTime}–${sched.endTime}">
@@ -562,7 +642,10 @@ function stepCardHTML(s, i, total, date) {
         <div class="step-card__sub">
           <span class="step-card__status status--${status}">${statusText}</span>
           <span class="step-card__duration">约 ${dur}</span>
+<<<<<<< HEAD
           ${dayChip}
+=======
+>>>>>>> ed55132 (feat: 计划分解器 v1.2 — 完整单计划时间规划工具（AI分解/拖拽排期/详情子任务/导出/响应式/可访问性）)
         </div>
         ${schedLine}
       </div>
