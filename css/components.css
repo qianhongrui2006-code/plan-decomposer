@@ -1313,3 +1313,54 @@
   background-color: var(--color-surface-2);
   cursor: not-allowed;
 }
+
+/* ---------- 懒加载补充详情横幅 ---------- */
+.detail__enrich {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  margin: var(--space-2) 0;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 50%, #ffe0f0 100%);
+  border: 2px dashed #f48fb1;
+  box-shadow: 2px 2px 0 var(--color-shadow-hard);
+  flex-wrap: wrap;
+}
+.detail__enrich-text {
+  flex: 1;
+  font-size: var(--font-size-xs);
+  color: #ad1457;
+  line-height: var(--line-height-normal);
+  min-width: 0;
+}
+.btn--enrich {
+  flex: 0 0 auto;
+  background-color: #f48fb1;
+  color: #fff;
+  border-color: #e91e63;
+  font-size: var(--font-size-xs);
+  padding: var(--space-1) var(--space-3);
+  box-shadow: 2px 2px 0 #c2185b;
+}
+.btn--enrich:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 #c2185b;
+}
+.btn--enrich:disabled {
+  opacity: 0.8;
+}
+
+/* 旋转动画 loading */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
