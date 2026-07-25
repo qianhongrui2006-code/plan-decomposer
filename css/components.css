@@ -54,7 +54,6 @@
 .btn--ghost:hover {
   background-color: var(--color-surface-3);
   color: var(--color-text);
-  transform: translate(-1px, -1px);
   box-shadow: var(--shadow-sm);
 }
 .btn--ghost:active {
@@ -1363,4 +1362,27 @@
 }
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ---------- 生成中加载提示 ---------- */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+.loading-state .spinner {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+  border-color: rgba(119, 140, 207, 0.2);
+  border-top-color: var(--color-primary);
+}
+.loading-state__sub {
+  font-size: var(--font-size-xs);
+  opacity: 0.7;
 }
